@@ -1,0 +1,10 @@
+*.dll
+*.lib
+*.exp
+*.obj
+*.pdb
+*.dblite
+
+libs/
+
+.vscode/

@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://omd5pmrgn75w"]
+
+[ext_resource type="Script" path="res://scenes/main.gd" id="1_xnfcu"]
+
+[sub_resource type="AudioStreamPD" id="AudioStreamPD_dybgy"]
+patch_name = "test.pd"
+
+[node name="Node" type="Node"]
+script = ExtResource("1_xnfcu")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = SubResource("AudioStreamPD_dybgy")
+volume_db = -6.0
