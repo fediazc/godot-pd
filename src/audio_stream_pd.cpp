@@ -1,13 +1,10 @@
 #include "audio_stream_pd.h"
+#include "util.hpp"
 #include <godot_cpp/core/class_db.hpp>
 
 using namespace godot;
 
-void AudioStreamPD::_bind_methods() {
-    ClassDB::bind_method(D_METHOD("get_patch_name"), &AudioStreamPD::get_patch_name);
-	ClassDB::bind_method(D_METHOD("set_patch_name", "p_patch_name"), &AudioStreamPD::set_patch_name);
-	ADD_PROPERTY(PropertyInfo(Variant::STRING, "patch_name"), "set_patch_name", "get_patch_name");
-}
+void AudioStreamPD::_bind_methods() { }
 
 AudioStreamPD::AudioStreamPD() { }
 
@@ -22,21 +19,26 @@ Ref<AudioStreamPlayback> AudioStreamPD::_instantiate_playback() const {
     return playback;
 }
 
-String AudioStreamPD::get_patch_name() const {
-    return String(patch_name.c_str());
-}
-
-std::string godot::AudioStreamPD::_get_patch_name() const {
-    return patch_name;
-}
-
-void AudioStreamPD::set_patch_name(String p_patch_name) {
-    patch_name = std::string(p_patch_name.utf8().get_data());
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void AudioStreamPlaybackPD::_bind_methods() { }
+void AudioStreamPlaybackPD::_bind_methods() { 
+    ClassDB::bind_method(D_METHOD("add_patch", "filename", "path"), &AudioStreamPlaybackPD::add_patch);
+    ClassDB::bind_method(D_METHOD("remove_patch", "filename", "path"), &AudioStreamPlaybackPD::remove_patch);
+    ClassDB::bind_method(D_METHOD("send_bang", "dest"), &AudioStreamPlaybackPD::send_bang);
+    ClassDB::bind_method(D_METHOD("send_float", "dest", "value"), &AudioStreamPlaybackPD::send_float);
+    ClassDB::bind_method(D_METHOD("send_symbol", "dest", "symbol"), &AudioStreamPlaybackPD::send_symbol);
+}
+
+AudioStreamPlaybackPD::AudioStreamPlaybackPD() { 
+    pd.init(0, 2, 44100); // TODO: check if init failed
+}
+
+AudioStreamPlaybackPD::~AudioStreamPlaybackPD() {
+    for (auto p : patches) {
+        pd.closePatch(p);
+    }
+    pd.clear();
+}
 
 int32_t AudioStreamPlaybackPD::_mix_resampled(AudioFrame *p_dst_buffer, int32_t p_frame_count) {
     int ticks = p_frame_count / libpd_blocksize();
@@ -52,22 +54,42 @@ int32_t AudioStreamPlaybackPD::_mix_resampled(AudioFrame *p_dst_buffer, int32_t 
     return p_frame_count;
 }
 
-float godot::AudioStreamPlaybackPD::_get_stream_sampling_rate() const {
+float AudioStreamPlaybackPD::_get_stream_sampling_rate() const {
     return 44100;
 }
 
-void godot::AudioStreamPlaybackPD::_start(double p_from_pos) {
-    pd.init(0, 2, 44100, true); // TODO: check if init failed
+void AudioStreamPlaybackPD::_start(double p_from_pos) {
     pd.computeAudio(true);
-
-    patch = pd.openPatch(stream->_get_patch_name(), "./pd");
-
     begin_resample();
 }
 
-AudioStreamPlaybackPD::AudioStreamPlaybackPD() { }
+int AudioStreamPlaybackPD::add_patch(String p_filename, String p_path) {
+    auto patch = pd.openPatch(std_string_from(p_filename), std_string_from(p_path));
+    if (patch.isValid()) { // TODO: send warning in case patch is not valid 
+        patches.push_back(patch);
+    }
 
-AudioStreamPlaybackPD::~AudioStreamPlaybackPD() {
-    pd.closePatch(patch);
-    pd.clear();
+    return patch.dollarZero();
+}
+
+void AudioStreamPlaybackPD::remove_patch(String p_filename, String p_path) {
+    patches.erase(std::remove_if(patches.begin(), patches.end(), [&](pd::Patch p) { 
+        if(p.filename() == std_string_from(p_filename) && p.path() == std_string_from(p_path)) {
+            pd.closePatch(p);
+            return true;
+        }
+        return false;
+    }), patches.end());
+}
+
+void AudioStreamPlaybackPD::send_bang(String p_dest) {
+    pd.sendBang(std_string_from(p_dest));
+}
+
+void AudioStreamPlaybackPD::send_float(String p_dest, float p_value) {
+    pd.sendFloat(std_string_from(p_dest), p_value);
+}
+
+void AudioStreamPlaybackPD::send_symbol(String p_dest, String p_symbol) {
+    pd.sendSymbol(std_string_from(p_dest), std_string_from(p_symbol));
 }

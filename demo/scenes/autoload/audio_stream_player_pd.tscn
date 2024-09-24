@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://dmi30kx2v0f3j"]
+
+[ext_resource type="Script" path="res://scenes/autoload/audio_stream_player_pd.gd" id="1_kbt5t"]
+
+[sub_resource type="AudioStreamPD" id="AudioStreamPD_4or1h"]
+
+[node name="AudioStreamPlayerPD" type="AudioStreamPlayer"]
+stream = SubResource("AudioStreamPD_4or1h")
+volume_db = -3.0
+script = ExtResource("1_kbt5t")
