@@ -32,7 +32,7 @@ grow_vertical = 2
 [node name="Label" type="Label" parent="CanvasLayer/Control/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
-text = "Left click or press the space bar to play a tone. Move your mouse up and down to change the frequency."
+text = "Click to play a tone. Move your mouse up and down to change the frequency. Pressing the space bar toggles playback."
 
 [node name="FreqLabel" type="Label" parent="CanvasLayer/Control/VBoxContainer"]
 layout_mode = 2

@@ -37,7 +37,7 @@ AudioStreamPlaybackPD::~AudioStreamPlaybackPD() {
     for (auto p : patches) {
         pd.closePatch(p);
     }
-    pd.clear();
+    // TODO check for multi-instance support, if enabled, PdBase::clear() should probably be called here
 }
 
 int32_t AudioStreamPlaybackPD::_mix_resampled(AudioFrame *p_dst_buffer, int32_t p_frame_count) {
