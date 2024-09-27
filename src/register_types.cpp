@@ -13,7 +13,7 @@ void initialize_godotpd(ModuleInitializationLevel p_level) {
 		return;
 	}
 
-    GDREGISTER_CLASS(AudioStreamPD)
+	GDREGISTER_CLASS(AudioStreamPD)
 	GDREGISTER_CLASS(AudioStreamPlaybackPD)
 }
 
