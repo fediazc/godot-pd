@@ -5,7 +5,6 @@
 #include <godot_cpp/classes/audio_stream.hpp>
 #include <godot_cpp/classes/audio_stream_playback_resampled.hpp>
 
-
 namespace godot {
 
 class AudioStreamPD : public AudioStream {
