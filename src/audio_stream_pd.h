@@ -10,11 +10,15 @@ namespace godot {
 class AudioStreamPD : public AudioStream {
 	GDCLASS(AudioStreamPD, AudioStream)
 
+	int mix_rate;
+
 protected:
 	static void _bind_methods();
 
 public:
 	Ref<AudioStreamPlayback> _instantiate_playback() const override;
+	void set_mix_rate(int p_mix_rate);
+	int get_mix_rate() const;
 
 	AudioStreamPD();
 	~AudioStreamPD();
@@ -27,6 +31,7 @@ class AudioStreamPlaybackPD : public AudioStreamPlaybackResampled {
 	const AudioStreamPD *stream;
 	pd::PdBase pd;
 	std::vector<pd::Patch> patches;
+	bool active;
 
 protected:
 	static void _bind_methods();

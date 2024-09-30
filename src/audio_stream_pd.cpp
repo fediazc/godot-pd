@@ -5,9 +5,15 @@
 
 using namespace godot;
 
-void AudioStreamPD::_bind_methods() {}
+void AudioStreamPD::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("set_mix_rate", "mix_rate"), &AudioStreamPD::set_mix_rate);
+	ClassDB::bind_method(D_METHOD("get_mix_rate"), &AudioStreamPD::get_mix_rate);
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "mix_rate", PROPERTY_HINT_RANGE, "20,192000,1,suffix:Hz"), "set_mix_rate", "get_mix_rate");
+}
 
-AudioStreamPD::AudioStreamPD() {}
+AudioStreamPD::AudioStreamPD() {
+	mix_rate = 44100;
+}
 
 AudioStreamPD::~AudioStreamPD() {}
 
@@ -20,7 +26,15 @@ Ref<AudioStreamPlayback> AudioStreamPD::_instantiate_playback() const {
 	return playback;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
+void godot::AudioStreamPD::set_mix_rate(int p_mix_rate) {
+	mix_rate = p_mix_rate;
+}
+
+int godot::AudioStreamPD::get_mix_rate() const {
+	return mix_rate;
+}
+
+//////////////
 
 void AudioStreamPlaybackPD::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("add_patch", "filename", "path"), &AudioStreamPlaybackPD::add_patch);
@@ -31,9 +45,8 @@ void AudioStreamPlaybackPD::_bind_methods() {
 }
 
 AudioStreamPlaybackPD::AudioStreamPlaybackPD() {
-	if (!pd.init(0, 2, 44100)) {
-		ERR_PRINT("Pure Data could not be initialized.");
-	}
+	active = false;
+	stream = nullptr;
 }
 
 AudioStreamPlaybackPD::~AudioStreamPlaybackPD() {
@@ -44,13 +57,12 @@ AudioStreamPlaybackPD::~AudioStreamPlaybackPD() {
 }
 
 int32_t AudioStreamPlaybackPD::_mix_resampled(AudioFrame *p_dst_buffer, int32_t p_frame_count) {
+	if (!active) {
+		return 0;
+	}
+
 	int ticks = p_frame_count / libpd_blocksize();
 	float output[1024 * 2 * sizeof(float)];
-
-	if (!pd.isInited()) {
-		ERR_PRINT_ONCE("Pure Data is not initialized. Cannot process audio.");
-		return p_frame_count;
-	}
 
 	ERR_FAIL_COND_V_MSG(!pd.processFloat(ticks, NULL, output), p_frame_count, "Pure Data audio processing failed");
 
@@ -64,14 +76,18 @@ int32_t AudioStreamPlaybackPD::_mix_resampled(AudioFrame *p_dst_buffer, int32_t 
 }
 
 float AudioStreamPlaybackPD::_get_stream_sampling_rate() const {
-	return 44100;
+	ERR_FAIL_COND_V_MSG(stream == nullptr, -1, "No audio stream available. Cannot get sample rate.");
+
+	return stream->get_mix_rate();
 }
 
 void AudioStreamPlaybackPD::_start(double p_from_pos) {
-	if (!pd.isInited()) {
-		ERR_PRINT("Pure Data is not initialized. Cannot start playback.");
-		return;
-	}
+	ERR_FAIL_COND_MSG(stream == nullptr, "No audio stream available.");
+
+	ERR_FAIL_COND_MSG(!pd.init(0, 2, stream->get_mix_rate()), "Pure Data could not be initialized.");
+
+	active = true;
+
 	pd.computeAudio(true);
 	begin_resample();
 }
