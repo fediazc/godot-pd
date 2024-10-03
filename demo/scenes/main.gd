@@ -30,10 +30,25 @@ func _process(_delta):
 func begin_playback():
 	AudioStreamPlayerPD.play()
 	pd_playback = AudioStreamPlayerPD.get_stream_playback()
+	pd_playback.subscribe("godot")
+	pd_playback.receive_bang.connect(_on_receive_bang)
+	pd_playback.receive_float.connect(_on_receive_float)
+	pd_playback.receive_symbol.connect(_on_receive_symbol)
+	pd_playback.add_patch("test-receive.pd", "./pd")
 	pd_playback.add_patch("test-send.pd", "./pd")
+
 	playing = true
 
 func stop_playback():
 	AudioStreamPlayerPD.stop()
 	pd_playback = null
 	playing = false
+	
+func _on_receive_bang(dest: String):
+	print("pd sent a bang to %s @ %ds" % [dest, Time.get_ticks_msec() / 1000.0])
+
+func _on_receive_float(dest: String, num: float):
+	print("pd sent a float (%.2f) to %s" % [num, dest])
+
+func _on_receive_symbol(dest: String, symbol: String):
+	print("pd sent a symbol ('%s') to %s" % [symbol, dest])

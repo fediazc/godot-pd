@@ -26,11 +26,11 @@ Ref<AudioStreamPlayback> AudioStreamPD::_instantiate_playback() const {
 	return playback;
 }
 
-void godot::AudioStreamPD::set_mix_rate(int p_mix_rate) {
+void AudioStreamPD::set_mix_rate(int p_mix_rate) {
 	mix_rate = p_mix_rate;
 }
 
-int godot::AudioStreamPD::get_mix_rate() const {
+int AudioStreamPD::get_mix_rate() const {
 	return mix_rate;
 }
 
@@ -42,24 +42,39 @@ void AudioStreamPlaybackPD::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("send_bang", "dest"), &AudioStreamPlaybackPD::send_bang);
 	ClassDB::bind_method(D_METHOD("send_float", "dest", "value"), &AudioStreamPlaybackPD::send_float);
 	ClassDB::bind_method(D_METHOD("send_symbol", "dest", "symbol"), &AudioStreamPlaybackPD::send_symbol);
+	ClassDB::bind_method(D_METHOD("subscribe", "source"), &AudioStreamPlaybackPD::subscribe);
+	ClassDB::bind_method(D_METHOD("unsubscribe", "source"), &AudioStreamPlaybackPD::unsubscribe);
+	ClassDB::bind_method(D_METHOD("unsubscribe_all"), &AudioStreamPlaybackPD::unsubscribe_all);
+
+	ADD_SIGNAL(MethodInfo("receive_bang", PropertyInfo(Variant::STRING, "dest")));
+	ADD_SIGNAL(MethodInfo("receive_float", PropertyInfo(Variant::STRING, "dest"), PropertyInfo(Variant::FLOAT, "num")));
+	ADD_SIGNAL(MethodInfo("receive_symbol", PropertyInfo(Variant::STRING, "dest"), PropertyInfo(Variant::STRING, "symbol")));
 }
 
 AudioStreamPlaybackPD::AudioStreamPlaybackPD() {
 	active = false;
 	stream = nullptr;
+	receiver.set_signaller(this);
+	pd.setReceiver(&receiver);
 }
 
 AudioStreamPlaybackPD::~AudioStreamPlaybackPD() {
 	for (auto p : patches) {
 		pd.closePatch(p);
 	}
-	// TODO check for multi-instance support, if enabled, PdBase::clear() should probably be called here
+
+	pd.setReceiver(NULL);
+	receiver.set_signaller(nullptr);
+
+	pd.clear();
 }
 
 int32_t AudioStreamPlaybackPD::_mix_resampled(AudioFrame *p_dst_buffer, int32_t p_frame_count) {
 	if (!active) {
 		return 0;
 	}
+
+	pd.receiveMessages();
 
 	int ticks = p_frame_count / libpd_blocksize();
 	float output[1024 * 2 * sizeof(float)];
@@ -84,7 +99,7 @@ float AudioStreamPlaybackPD::_get_stream_sampling_rate() const {
 void AudioStreamPlaybackPD::_start(double p_from_pos) {
 	ERR_FAIL_COND_MSG(stream == nullptr, "No audio stream available.");
 
-	ERR_FAIL_COND_MSG(!pd.init(0, 2, stream->get_mix_rate()), "Pure Data could not be initialized.");
+	ERR_FAIL_COND_MSG(!pd.init(0, 2, stream->get_mix_rate(), true), "Pure Data could not be initialized.");
 
 	active = true;
 
@@ -123,4 +138,16 @@ void AudioStreamPlaybackPD::send_float(String p_dest, float p_value) {
 
 void AudioStreamPlaybackPD::send_symbol(String p_dest, String p_symbol) {
 	pd.sendSymbol(std_string_from(p_dest), std_string_from(p_symbol));
+}
+
+void AudioStreamPlaybackPD::subscribe(String p_source) {
+	pd.subscribe(std_string_from(p_source));
+}
+
+void AudioStreamPlaybackPD::unsubscribe(String p_source) {
+	pd.unsubscribe(std_string_from(p_source));
+}
+
+void AudioStreamPlaybackPD::unsubscribe_all() {
+	pd.unsubscribeAll();
 }

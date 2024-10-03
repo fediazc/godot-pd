@@ -1,6 +1,7 @@
 #ifndef AUDIO_STREAM_PD_H
 #define AUDIO_STREAM_PD_H
 
+#include "gdpd_receiver.h"
 #include <PdBase.hpp>
 #include <godot_cpp/classes/audio_stream.hpp>
 #include <godot_cpp/classes/audio_stream_playback_resampled.hpp>
@@ -29,6 +30,7 @@ class AudioStreamPlaybackPD : public AudioStreamPlaybackResampled {
 	friend class AudioStreamPD;
 
 	const AudioStreamPD *stream;
+	gdpd::Receiver receiver;
 	pd::PdBase pd;
 	std::vector<pd::Patch> patches;
 	bool active;
@@ -45,6 +47,9 @@ public:
 	void send_bang(String p_dest);
 	void send_float(String p_dest, float p_value);
 	void send_symbol(String p_dest, String p_symbol);
+	void subscribe(String p_source);
+	void unsubscribe(String p_source);
+	void unsubscribe_all();
 
 	AudioStreamPlaybackPD();
 	~AudioStreamPlaybackPD();
