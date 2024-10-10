@@ -5,6 +5,7 @@
 #include <PdBase.hpp>
 #include <godot_cpp/classes/audio_stream.hpp>
 #include <godot_cpp/classes/audio_stream_playback_resampled.hpp>
+#include <godot_cpp/variant/array.hpp>
 
 namespace godot {
 
@@ -37,6 +38,7 @@ class AudioStreamPlaybackPD : public AudioStreamPlaybackResampled {
 
 protected:
 	static void _bind_methods();
+	static pd::List _pd_list_from(const Array &p_arr);
 
 public:
 	int32_t _mix_resampled(AudioFrame *p_dst_buffer, int32_t p_frame_count) override;
@@ -47,6 +49,8 @@ public:
 	void send_bang(String p_dest);
 	void send_float(String p_dest, float p_value);
 	void send_symbol(String p_dest, String p_symbol);
+	void send_list(String p_dest, Array p_arr);
+	void send_message(String p_dest, String p_msg, Array p_arr);
 	void subscribe(String p_source);
 	void unsubscribe(String p_source);
 	void unsubscribe_all();

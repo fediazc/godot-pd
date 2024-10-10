@@ -42,6 +42,8 @@ void AudioStreamPlaybackPD::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("send_bang", "dest"), &AudioStreamPlaybackPD::send_bang);
 	ClassDB::bind_method(D_METHOD("send_float", "dest", "value"), &AudioStreamPlaybackPD::send_float);
 	ClassDB::bind_method(D_METHOD("send_symbol", "dest", "symbol"), &AudioStreamPlaybackPD::send_symbol);
+	ClassDB::bind_method(D_METHOD("send_list", "dest", "list"), &AudioStreamPlaybackPD::send_list);
+	ClassDB::bind_method(D_METHOD("send_message", "dest", "msg", "list"), &AudioStreamPlaybackPD::send_message);
 	ClassDB::bind_method(D_METHOD("subscribe", "source"), &AudioStreamPlaybackPD::subscribe);
 	ClassDB::bind_method(D_METHOD("unsubscribe", "source"), &AudioStreamPlaybackPD::unsubscribe);
 	ClassDB::bind_method(D_METHOD("unsubscribe_all"), &AudioStreamPlaybackPD::unsubscribe_all);
@@ -49,6 +51,26 @@ void AudioStreamPlaybackPD::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("receive_bang", PropertyInfo(Variant::STRING, "dest")));
 	ADD_SIGNAL(MethodInfo("receive_float", PropertyInfo(Variant::STRING, "dest"), PropertyInfo(Variant::FLOAT, "num")));
 	ADD_SIGNAL(MethodInfo("receive_symbol", PropertyInfo(Variant::STRING, "dest"), PropertyInfo(Variant::STRING, "symbol")));
+	ADD_SIGNAL(MethodInfo("receive_list", PropertyInfo(Variant::STRING, "dest"), PropertyInfo(Variant::ARRAY, "list")));
+	ADD_SIGNAL(MethodInfo("receive_message", PropertyInfo(Variant::STRING, "dest"), PropertyInfo(Variant::STRING, "msg"), PropertyInfo(Variant::ARRAY, "list")));
+}
+
+pd::List AudioStreamPlaybackPD::_pd_list_from(const Array &p_arr) {
+	pd::List list;
+	for (int64_t i = 0; i < p_arr.size(); i++) {
+		switch (const Variant val = p_arr[i]; val.get_type()) {
+			case Variant::FLOAT:
+			case Variant::INT:
+				list.addFloat(float(val));
+				break;
+			case Variant::STRING:
+				list.addSymbol(std_string_from(String(val)));
+				break;
+			default:
+				ERR_FAIL_V_MSG(pd::List(), "Value of type \"" + Variant::get_type_name(val.get_type()) + "\" (at index " + godot_string_from(std::to_string(i)) + ") cannot be added to a Pure Data list.");
+		}
+	}
+	return list;
 }
 
 AudioStreamPlaybackPD::AudioStreamPlaybackPD() {
@@ -138,6 +160,22 @@ void AudioStreamPlaybackPD::send_float(String p_dest, float p_value) {
 
 void AudioStreamPlaybackPD::send_symbol(String p_dest, String p_symbol) {
 	pd.sendSymbol(std_string_from(p_dest), std_string_from(p_symbol));
+}
+
+void AudioStreamPlaybackPD::send_list(String p_dest, Array p_arr) {
+	auto list = _pd_list_from(p_arr);
+
+	ERR_FAIL_COND_MSG(list.len() == 0 && !p_arr.is_empty(), "Failed to create list.");
+
+	pd.sendList(std_string_from(p_dest), list);
+}
+
+void godot::AudioStreamPlaybackPD::send_message(String p_dest, String p_msg, Array p_arr) {
+	auto list = _pd_list_from(p_arr);
+
+	ERR_FAIL_COND_MSG(list.len() == 0 && !p_arr.is_empty(), "Failed to create list.");
+
+	pd.sendMessage(std_string_from(p_dest), std_string_from(p_msg), list);
 }
 
 void AudioStreamPlaybackPD::subscribe(String p_source) {

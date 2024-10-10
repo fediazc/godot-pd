@@ -7,6 +7,7 @@ var playing = false
 
 func _ready():
 	begin_playback()
+	pd_playback.send_list("list", ["test", 1, 2, 3])
 
 func _process(_delta):
 	var rect_size = get_viewport().get_visible_rect().size
@@ -22,6 +23,7 @@ func _process(_delta):
 		if playing:
 			stop_playback()
 		else:
+			print()
 			begin_playback()
 	
 	if playing:
@@ -34,6 +36,7 @@ func begin_playback():
 	pd_playback.receive_bang.connect(_on_receive_bang)
 	pd_playback.receive_float.connect(_on_receive_float)
 	pd_playback.receive_symbol.connect(_on_receive_symbol)
+	pd_playback.receive_list.connect(_on_receive_list)
 	pd_playback.add_patch("test-receive.pd", "./pd")
 	pd_playback.add_patch("test-send.pd", "./pd")
 
@@ -52,3 +55,6 @@ func _on_receive_float(dest: String, num: float):
 
 func _on_receive_symbol(dest: String, symbol: String):
 	print("pd sent a symbol ('%s') to %s" % [symbol, dest])
+
+func _on_receive_list(dest: String, list: Array):
+	print("pd sent a list (%s) to %s" % [list, dest])
