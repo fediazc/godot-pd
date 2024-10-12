@@ -6,6 +6,7 @@
 #include <godot_cpp/classes/audio_stream.hpp>
 #include <godot_cpp/classes/audio_stream_playback_resampled.hpp>
 #include <godot_cpp/variant/array.hpp>
+#include <godot_cpp/variant/typed_array.hpp>
 
 namespace godot {
 
@@ -54,6 +55,10 @@ public:
 	void subscribe(String p_source);
 	void unsubscribe(String p_source);
 	void unsubscribe_all();
+	int get_array_size(String p_name);
+	void resize_array(String p_name, int64_t size);
+	Array read_array(String p_name, int p_read_len, int p_offset);
+	void write_array(String p_name, TypedArray<float> p_source, int p_write_len, int p_offset);
 
 	AudioStreamPlaybackPD();
 	~AudioStreamPlaybackPD();

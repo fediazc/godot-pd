@@ -7,7 +7,6 @@ var playing = false
 
 func _ready():
 	begin_playback()
-	pd_playback.send_list("list", ["test", 1, 2, 3])
 
 func _process(_delta):
 	var rect_size = get_viewport().get_visible_rect().size
@@ -32,13 +31,28 @@ func _process(_delta):
 func begin_playback():
 	AudioStreamPlayerPD.play()
 	pd_playback = AudioStreamPlayerPD.get_stream_playback()
+	
+	pd_playback.add_patch("test-array.pd", "./pd")
+	var sz := pd_playback.get_array_size("array")
+	var arr := pd_playback.read_array("array", 3, 2)
+	print("%d element array before write: %s" % [sz, arr])
+	pd_playback.write_array("array", [1, 2, 3, 4, 5])
+	arr = pd_playback.read_array("array")
+	print("array after write: %s" % [arr])
+	pd_playback.resize_array("array", 2)
+	arr = pd_playback.read_array("array")
+	print("array after resize: %s" % [arr])
+	pd_playback.remove_patch("test-array.pd", "./pd")
+	
 	pd_playback.subscribe("godot")
 	pd_playback.receive_bang.connect(_on_receive_bang)
 	pd_playback.receive_float.connect(_on_receive_float)
 	pd_playback.receive_symbol.connect(_on_receive_symbol)
 	pd_playback.receive_list.connect(_on_receive_list)
 	pd_playback.add_patch("test-receive.pd", "./pd")
+	
 	pd_playback.add_patch("test-send.pd", "./pd")
+	pd_playback.send_list("list", ["test", 1, 2, 3])
 
 	playing = true
 

@@ -47,6 +47,10 @@ void AudioStreamPlaybackPD::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("subscribe", "source"), &AudioStreamPlaybackPD::subscribe);
 	ClassDB::bind_method(D_METHOD("unsubscribe", "source"), &AudioStreamPlaybackPD::unsubscribe);
 	ClassDB::bind_method(D_METHOD("unsubscribe_all"), &AudioStreamPlaybackPD::unsubscribe_all);
+	ClassDB::bind_method(D_METHOD("get_array_size", "name"), &AudioStreamPlaybackPD::get_array_size);
+	ClassDB::bind_method(D_METHOD("resize_array", "name", "size"), &AudioStreamPlaybackPD::resize_array);
+	ClassDB::bind_method(D_METHOD("read_array", "name", "read_len", "offset"), &AudioStreamPlaybackPD::read_array, DEFVAL(-1), DEFVAL(0));
+	ClassDB::bind_method(D_METHOD("write_array", "name", "source", "write_len", "offset"), &AudioStreamPlaybackPD::write_array, DEFVAL(-1), DEFVAL(0));
 
 	ADD_SIGNAL(MethodInfo("receive_bang", PropertyInfo(Variant::STRING, "dest")));
 	ADD_SIGNAL(MethodInfo("receive_float", PropertyInfo(Variant::STRING, "dest"), PropertyInfo(Variant::FLOAT, "num")));
@@ -188,4 +192,53 @@ void AudioStreamPlaybackPD::unsubscribe(String p_source) {
 
 void AudioStreamPlaybackPD::unsubscribe_all() {
 	pd.unsubscribeAll();
+}
+
+int AudioStreamPlaybackPD::get_array_size(String p_name) {
+	return libpd_arraysize(std_string_from(p_name).c_str());
+}
+
+void AudioStreamPlaybackPD::resize_array(String p_name, int64_t size) {
+	ERR_FAIL_COND_MSG(libpd_arraysize(std_string_from(p_name).c_str()) < 0, "Array \"" + p_name + "\" was not be found.");
+	ERR_FAIL_COND_MSG(!pd.resizeArray(std_string_from(p_name), size), "Array resize failed.");
+}
+
+Array AudioStreamPlaybackPD::read_array(String p_name, int p_read_len, int p_offset) {
+	ERR_FAIL_COND_V_MSG(p_offset < 0, Array(), "Cannot read from an array from a negative offset (" + godot_string_from(std::to_string(p_offset)) + ")");
+
+	auto arr_len = get_array_size(p_name);
+
+	ERR_FAIL_COND_V_MSG(arr_len < 0, Array(), "Array \"" + p_name + "\" was not be found.");
+
+	auto true_read_len = p_read_len < 0 ? arr_len : p_read_len;
+	ERR_FAIL_COND_V_MSG(true_read_len + p_offset > arr_len, Array(), "Read exceeds bound of the Pure Data array. (Requested to read " + godot_string_from(std::to_string(true_read_len)) + " elements at an offset of " + godot_string_from(std::to_string(p_offset)) + " from an array of size " + godot_string_from(std::to_string(arr_len)) + ").");
+
+	std::vector<float> vec;
+	ERR_FAIL_COND_V_MSG(!pd.readArray(std_string_from(p_name), vec, p_read_len, p_offset), Array(), "Read from array failed.");
+
+	Array arr;
+	for (auto val : vec) {
+		arr.append(val);
+	}
+
+	return arr;
+}
+
+void AudioStreamPlaybackPD::write_array(String p_name, TypedArray<float> p_source, int p_write_len, int p_offset) {
+	ERR_FAIL_COND_MSG(p_offset < 0, "Cannot write to an array from a negative offset (" + godot_string_from(std::to_string(p_offset)) + ").");
+
+	auto arr_len = get_array_size(p_name);
+
+	ERR_FAIL_COND_MSG(arr_len < 0, "Array \"" + p_name + "\" was not be found.");
+
+	std::vector<float> vec;
+	for (int64_t i = 0; i < p_source.size(); i++) {
+		vec.push_back(float(p_source[i]));
+	}
+
+	auto true_write_len = p_write_len < 0 ? arr_len : p_write_len;
+	ERR_FAIL_COND_MSG(true_write_len > p_source.size(), "Not enough elements in the given source array (Requested to write " + godot_string_from(std::to_string(true_write_len)) + " elements, only given " + godot_string_from(std::to_string(p_source.size())) + ").");
+	ERR_FAIL_COND_MSG(true_write_len + p_offset > arr_len, "Write exceeds bound of the Pure Data array. (Requested to write " + godot_string_from(std::to_string(true_write_len)) + " elements at an offset of " + godot_string_from(std::to_string(p_offset)) + " to an array of size " + godot_string_from(std::to_string(arr_len)) + ").");
+
+	ERR_FAIL_COND_MSG(!pd.writeArray(std_string_from(p_name), vec, p_write_len, p_offset), "Write to array failed.");
 }
