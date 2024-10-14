@@ -7,14 +7,11 @@ env.Append(LIBPATH=["libs/"])
 env.Append(LIBS=["libpd"])
 env.Append(CPPPATH=["src/"])
 
-if "msvc_include" in ARGUMENTS:
-    env.Append(CPPPATH=[ARGUMENTS["msvc_include"]])
-
-include = []
-for dirpath, dirnames, filenames in os.walk("libpd"):
-    for dname in dirnames:
-        include.append(os.path.join(dirpath, dname))
-env.Append(CPPPATH=include)
+env.Append(CPPPATH=[
+    "libpd\\cpp",
+    "libpd\\libpd_wrapper",
+    "libpd\\pure-data\\src"
+])
 
 sources = Glob("src/*.cpp")
 
