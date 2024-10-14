@@ -34,7 +34,7 @@ func begin_playback():
 	
 	pd_playback.add_patch("test-array.pd", "./pd")
 	var sz := pd_playback.get_array_size("array")
-	var arr := pd_playback.read_array("array", 3, 2)
+	var arr := pd_playback.read_array("array")
 	print("%d element array before write: %s" % [sz, arr])
 	pd_playback.write_array("array", [1, 2, 3, 4, 5])
 	arr = pd_playback.read_array("array")
@@ -49,7 +49,9 @@ func begin_playback():
 	pd_playback.receive_float.connect(_on_receive_float)
 	pd_playback.receive_symbol.connect(_on_receive_symbol)
 	pd_playback.receive_list.connect(_on_receive_list)
+	pd_playback.receive_note_on.connect(_on_receive_note_on)
 	pd_playback.add_patch("test-receive.pd", "./pd")
+	pd_playback.add_patch("test-midi.pd", "./pd")
 	
 	pd_playback.add_patch("test-send.pd", "./pd")
 	pd_playback.send_list("list", ["test", 1, 2, 3])
@@ -72,3 +74,6 @@ func _on_receive_symbol(dest: String, symbol: String):
 
 func _on_receive_list(dest: String, list: Array):
 	print("pd sent a list (%s) to %s" % [list, dest])
+	
+func _on_receive_note_on(channel: int, pitch: int, velocity: int):
+	print("pd sent a midi note ([ch: %d, pitch: %d, vel: %d])" % [channel, pitch, velocity])

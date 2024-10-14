@@ -52,6 +52,16 @@ public:
 	void send_symbol(String p_dest, String p_symbol);
 	void send_list(String p_dest, Array p_arr);
 	void send_message(String p_dest, String p_msg, Array p_arr);
+	void send_note_on(int p_channel, int p_pitch, int p_velocity);
+	void send_note_off(int p_channel, int p_pitch);
+	void send_control_change(int p_channel, int p_controller, int p_value);
+	void send_program_change(int p_channel, int p_value);
+	void send_pitch_bend(int p_channel, int p_value);
+	void send_aftertouch(int p_channel, int p_value);
+	void send_poly_aftertouch(int p_channel, int p_pitch, int p_value);
+	void send_midi_byte(int p_port, int p_value);
+	void send_sysex(int p_port, int p_value);
+	void send_sys_realtime(int p_port, int p_value);
 	void subscribe(String p_source);
 	void unsubscribe(String p_source);
 	void unsubscribe_all();

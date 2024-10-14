@@ -44,6 +44,16 @@ void AudioStreamPlaybackPD::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("send_symbol", "dest", "symbol"), &AudioStreamPlaybackPD::send_symbol);
 	ClassDB::bind_method(D_METHOD("send_list", "dest", "list"), &AudioStreamPlaybackPD::send_list);
 	ClassDB::bind_method(D_METHOD("send_message", "dest", "msg", "list"), &AudioStreamPlaybackPD::send_message);
+	ClassDB::bind_method(D_METHOD("send_note_on", "channel", "pitch", "velocity"), &AudioStreamPlaybackPD::send_note_on, DEFVAL(64));
+	ClassDB::bind_method(D_METHOD("send_note_off", "channel", "pitch"), &AudioStreamPlaybackPD::send_note_off);
+	ClassDB::bind_method(D_METHOD("send_control_change", "channel", "controller", "value"), &AudioStreamPlaybackPD::send_control_change);
+	ClassDB::bind_method(D_METHOD("send_program_change", "channel", "value"), &AudioStreamPlaybackPD::send_program_change);
+	ClassDB::bind_method(D_METHOD("send_pitch_bend", "channel", "value"), &AudioStreamPlaybackPD::send_pitch_bend);
+	ClassDB::bind_method(D_METHOD("send_aftertouch", "channel", "value"), &AudioStreamPlaybackPD::send_aftertouch);
+	ClassDB::bind_method(D_METHOD("send_poly_aftertouch", "channel", "pitch", "value"), &AudioStreamPlaybackPD::send_poly_aftertouch);
+	ClassDB::bind_method(D_METHOD("send_midi_byte", "port", "value"), &AudioStreamPlaybackPD::send_midi_byte);
+	ClassDB::bind_method(D_METHOD("send_sysex", "port", "value"), &AudioStreamPlaybackPD::send_sysex);
+	ClassDB::bind_method(D_METHOD("send_sys_realtime", "port", "value"), &AudioStreamPlaybackPD::send_sys_realtime);
 	ClassDB::bind_method(D_METHOD("subscribe", "source"), &AudioStreamPlaybackPD::subscribe);
 	ClassDB::bind_method(D_METHOD("unsubscribe", "source"), &AudioStreamPlaybackPD::unsubscribe);
 	ClassDB::bind_method(D_METHOD("unsubscribe_all"), &AudioStreamPlaybackPD::unsubscribe_all);
@@ -57,6 +67,13 @@ void AudioStreamPlaybackPD::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("receive_symbol", PropertyInfo(Variant::STRING, "dest"), PropertyInfo(Variant::STRING, "symbol")));
 	ADD_SIGNAL(MethodInfo("receive_list", PropertyInfo(Variant::STRING, "dest"), PropertyInfo(Variant::ARRAY, "list")));
 	ADD_SIGNAL(MethodInfo("receive_message", PropertyInfo(Variant::STRING, "dest"), PropertyInfo(Variant::STRING, "msg"), PropertyInfo(Variant::ARRAY, "list")));
+	ADD_SIGNAL(MethodInfo("receive_note_on", PropertyInfo(Variant::INT, "channel"), PropertyInfo(Variant::INT, "pitch"), PropertyInfo(Variant::INT, "velocity")));
+	ADD_SIGNAL(MethodInfo("receive_control_change", PropertyInfo(Variant::INT, "channel"), PropertyInfo(Variant::INT, "controller"), PropertyInfo(Variant::INT, "value")));
+	ADD_SIGNAL(MethodInfo("receive_program_change", PropertyInfo(Variant::INT, "channel"), PropertyInfo(Variant::INT, "value")));
+	ADD_SIGNAL(MethodInfo("receive_pitch_bend", PropertyInfo(Variant::INT, "channel"), PropertyInfo(Variant::INT, "value")));
+	ADD_SIGNAL(MethodInfo("receive_aftertouch", PropertyInfo(Variant::INT, "channel"), PropertyInfo(Variant::INT, "value")));
+	ADD_SIGNAL(MethodInfo("receive_poly_aftertouch", PropertyInfo(Variant::INT, "channel"), PropertyInfo(Variant::INT, "pitch"), PropertyInfo(Variant::INT, "value")));
+	ADD_SIGNAL(MethodInfo("receive_midi_byte", PropertyInfo(Variant::INT, "port"), PropertyInfo(Variant::INT, "value")));
 }
 
 pd::List AudioStreamPlaybackPD::_pd_list_from(const Array &p_arr) {
@@ -82,6 +99,7 @@ AudioStreamPlaybackPD::AudioStreamPlaybackPD() {
 	stream = nullptr;
 	receiver.set_signaller(this);
 	pd.setReceiver(&receiver);
+	pd.setMidiReceiver(&receiver);
 }
 
 AudioStreamPlaybackPD::~AudioStreamPlaybackPD() {
@@ -90,6 +108,7 @@ AudioStreamPlaybackPD::~AudioStreamPlaybackPD() {
 	}
 
 	pd.setReceiver(NULL);
+	pd.setMidiReceiver(NULL);
 	receiver.set_signaller(nullptr);
 
 	pd.clear();
@@ -101,6 +120,7 @@ int32_t AudioStreamPlaybackPD::_mix_resampled(AudioFrame *p_dst_buffer, int32_t 
 	}
 
 	pd.receiveMessages();
+	pd.receiveMidi();
 
 	int ticks = p_frame_count / libpd_blocksize();
 	float output[1024 * 2 * sizeof(float)];
@@ -180,6 +200,43 @@ void godot::AudioStreamPlaybackPD::send_message(String p_dest, String p_msg, Arr
 	ERR_FAIL_COND_MSG(list.len() == 0 && !p_arr.is_empty(), "Failed to create list.");
 
 	pd.sendMessage(std_string_from(p_dest), std_string_from(p_msg), list);
+}
+
+void AudioStreamPlaybackPD::send_note_on(int p_channel, int p_pitch, int p_velocity) {
+	pd.sendNoteOn(p_channel, p_pitch, p_velocity);
+}
+
+void AudioStreamPlaybackPD::send_note_off(int p_channel, int p_pitch) {
+	pd.sendNoteOn(p_channel, p_pitch, 0);
+}
+
+void AudioStreamPlaybackPD::send_control_change(int p_channel, int p_controller, int p_value) {
+	pd.sendControlChange(p_channel, p_controller, p_value);
+}
+
+void AudioStreamPlaybackPD::send_program_change(int p_channel, int p_value) {
+	pd.sendProgramChange(p_channel, p_value);
+}
+void AudioStreamPlaybackPD::send_pitch_bend(int p_channel, int p_value) {
+	pd.sendPitchBend(p_channel, p_value);
+}
+void AudioStreamPlaybackPD::send_aftertouch(int p_channel, int p_value) {
+	pd.sendAftertouch(p_channel, p_value);
+}
+void AudioStreamPlaybackPD::send_poly_aftertouch(int p_channel, int p_pitch, int p_value) {
+	pd.sendPolyAftertouch(p_channel, p_pitch, p_value);
+}
+
+void AudioStreamPlaybackPD::send_midi_byte(int p_port, int p_value) {
+	pd.sendMidiByte(p_port, p_value);
+}
+
+void AudioStreamPlaybackPD::send_sysex(int p_port, int p_value) {
+	pd.sendSysex(p_port, p_value);
+}
+
+void AudioStreamPlaybackPD::send_sys_realtime(int p_port, int p_value) {
+	pd.sendSysRealTime(p_port, p_value);
 }
 
 void AudioStreamPlaybackPD::subscribe(String p_source) {
