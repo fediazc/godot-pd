@@ -194,7 +194,7 @@ void AudioStreamPlaybackPD::send_list(String p_dest, Array p_arr) {
 	pd.sendList(std_string_from(p_dest), list);
 }
 
-void godot::AudioStreamPlaybackPD::send_message(String p_dest, String p_msg, Array p_arr) {
+void AudioStreamPlaybackPD::send_message(String p_dest, String p_msg, Array p_arr) {
 	auto list = _pd_list_from(p_arr);
 
 	ERR_FAIL_COND_MSG(list.len() == 0 && !p_arr.is_empty(), "Failed to create list.");
@@ -255,9 +255,9 @@ int AudioStreamPlaybackPD::get_array_size(String p_name) {
 	return libpd_arraysize(std_string_from(p_name).c_str());
 }
 
-void AudioStreamPlaybackPD::resize_array(String p_name, int64_t size) {
+void AudioStreamPlaybackPD::resize_array(String p_name, int64_t p_size) {
 	ERR_FAIL_COND_MSG(libpd_arraysize(std_string_from(p_name).c_str()) < 0, "Array \"" + p_name + "\" was not be found.");
-	ERR_FAIL_COND_MSG(!pd.resizeArray(std_string_from(p_name), size), "Array resize failed.");
+	ERR_FAIL_COND_MSG(!pd.resizeArray(std_string_from(p_name), p_size), "Array resize failed.");
 }
 
 Array AudioStreamPlaybackPD::read_array(String p_name, int p_read_len, int p_offset) {

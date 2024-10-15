@@ -8,7 +8,7 @@ using namespace godot;
 
 #define CHECK_SIGNALLER ERR_FAIL_NULL_MSG(signaller, "No signaller is set. Cannot send signal");
 
-godot::Array gdpd::Receiver::_godot_array_from(const pd::List &p_list) {
+Array Receiver::_godot_array_from(const pd::List &p_list) {
 	Array arr;
 	for (unsigned i = 0; i < p_list.len(); i++) {
 		if (p_list.isFloat(i)) {
@@ -52,50 +52,50 @@ void Receiver::receiveList(const std::string &p_dest, const pd::List &p_list) {
 	signaller->emit_signal("receive_list", godot_string_from(p_dest), arr);
 }
 
-void gdpd::Receiver::receiveMessage(const std::string &p_dest, const std::string &p_msg, const pd::List &p_list) {
+void Receiver::receiveMessage(const std::string &p_dest, const std::string &p_msg, const pd::List &p_list) {
 	CHECK_SIGNALLER
 	auto arr = _godot_array_from(p_list);
 
 	signaller->emit_signal("receive_message", godot_string_from(p_dest), godot_string_from(p_msg), arr);
 }
 
-void gdpd::Receiver::receiveNoteOn(const int p_channel, const int p_pitch, const int p_velocity) {
+void Receiver::receiveNoteOn(const int p_channel, const int p_pitch, const int p_velocity) {
 	CHECK_SIGNALLER
 
 	signaller->emit_signal("receive_note_on", p_channel, p_pitch, p_velocity);
 }
 
-void gdpd::Receiver::receiveControlChange(const int p_channel, const int p_controller, const int p_value) {
+void Receiver::receiveControlChange(const int p_channel, const int p_controller, const int p_value) {
 	CHECK_SIGNALLER
 
 	signaller->emit_signal("receive_control_change", p_channel, p_controller);
 }
 
-void gdpd::Receiver::receiveProgramChange(const int p_channel, const int p_value) {
+void Receiver::receiveProgramChange(const int p_channel, const int p_value) {
 	CHECK_SIGNALLER
 
 	signaller->emit_signal("receive_program_change", p_channel, p_value);
 }
 
-void gdpd::Receiver::receivePitchBend(const int p_channel, const int p_value) {
+void Receiver::receivePitchBend(const int p_channel, const int p_value) {
 	CHECK_SIGNALLER
 
 	signaller->emit_signal("receive_pitch_bend", p_channel, p_value);
 }
 
-void gdpd::Receiver::receiveAftertouch(const int p_channel, const int p_value) {
+void Receiver::receiveAftertouch(const int p_channel, const int p_value) {
 	CHECK_SIGNALLER
 
 	signaller->emit_signal("receive_aftertouch", p_channel, p_value);
 }
 
-void gdpd::Receiver::receivePolyAftertouch(const int p_channel, const int p_pitch, const int p_value) {
+void Receiver::receivePolyAftertouch(const int p_channel, const int p_pitch, const int p_value) {
 	CHECK_SIGNALLER
 
 	signaller->emit_signal("receive_poly_aftertouch", p_channel, p_pitch, p_value);
 }
 
-void gdpd::Receiver::receiveMidiByte(const int p_port, const int p_byte) {
+void Receiver::receiveMidiByte(const int p_port, const int p_byte) {
 	CHECK_SIGNALLER
 
 	signaller->emit_signal("receive_midi_byte", p_port, p_byte);
