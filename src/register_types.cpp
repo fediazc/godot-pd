@@ -3,6 +3,7 @@
 #include "audio_stream_pd.h"
 
 #include <gdextension_interface.h>
+#include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
 
@@ -15,6 +16,10 @@ void initialize_godotpd(ModuleInitializationLevel p_level) {
 
 	GDREGISTER_CLASS(AudioStreamPD)
 	GDREGISTER_CLASS(AudioStreamPlaybackPD)
+
+#ifndef PDINSTANCE
+	Engine::get_singleton()->register_singleton("MainPlaybackPD", memnew(AudioStreamPlaybackPD));
+#endif
 }
 
 void uninitialize_godotpd(ModuleInitializationLevel p_level) {
