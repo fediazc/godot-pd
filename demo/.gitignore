@@ -1,5 +1,6 @@
 bin/
 *.tmp
+export/
 
 # Godot 4+ specific ignores
 .godot/

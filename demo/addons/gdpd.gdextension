@@ -14,8 +14,10 @@ windows.release.x86_64 = "res://addons/bin/godotpd.windows.template_release.x86_
 windows.debug = {
     "res://addons/bin/libpd.dll" : "",
     "res://addons/bin/pthreadVC2.dll" : "",
+    "res://addons/bin/pthreadGC2.dll" : "",
 }
 windows.release = {
     "res://addons/bin/libpd.dll" : "",
     "res://addons/bin/pthreadVC2.dll" : "",
+    "res://addons/bin/pthreadGC2.dll" : "",
 }
