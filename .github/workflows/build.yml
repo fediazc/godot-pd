@@ -12,28 +12,45 @@ jobs:
         include:
           - identifier: linux-debug
             name: Linux Debug
-            runner: ubuntu-20.04
+            runner: ubuntu-22.04
             target: template_debug
             platform: linux
             arch: x86_64
+            build-type: Debug
           - identifier: linux-release
             name: Linux Release
-            runner: ubuntu-20.04
+            runner: ubuntu-22.04
             target: template_release
             platform: linux
             arch: x86_64
+            build-type: Release
           - identifier: windows-debug
             name: Windows Debug
-            runner: ubuntu-20.04
+            runner: ubuntu-22.04
             target: template_debug
             platform: windows
             arch: x86_64
+            build-type: Debug
           - identifier: windows-release
             name: Windows Release
-            runner: ubuntu-20.04
+            runner: ubuntu-22.04
             target: template_release
             platform: windows
             arch: x86_64
+            build-type: Release
+          - identifier: macos-debug
+            name: macOS Debug
+            runner: macos-14
+            target: template_debug
+            platform: macos
+            build-type: Debug
+          - identifier: macos-release
+            name: macOS Release
+            runner: macos-14
+            target: template_release
+            platform: macos
+            build-type: Release
+
     steps:
       - name: (Windows) Install mingw64
         if: ${{ startsWith(matrix.identifier, 'windows-') }}
@@ -66,25 +83,33 @@ jobs:
           cd libpd
           echo 'set(CMAKE_SHARED_LIBRARY_PREFIX "")' >> CMakeLists.txt
           mkdir build && cd build
-          cmake .. -DCMAKE_TOOLCHAIN_FILE=../../toolchain-mingw-x86_64-w64.cmake
+          cmake .. -DCMAKE_TOOLCHAIN_FILE=../../toolchain-mingw-x86_64-w64.cmake -DCMAKE_BUILD_TYPE='${{ matrix.build-type }}'
           cmake --build .
+          cd libs
           mv liblibpd.dll.a libpd.a
           ls -l
       
-      - name: (Linux) Compile libpd
-        if: ${{ startsWith(matrix.identifier, 'linux-') }}
+      - name: (Linux & macOS) Compile libpd
+        if: ${{ !startsWith(matrix.identifier, 'windows-') }}
         shell: sh
         run: |
           cd libpd
           mkdir build && cd build
-          cmake ..
+          cmake .. -DCMAKE_BUILD_TYPE='${{ matrix.build-type }}'
           cmake --build .
+          cd libs
           ls -l
 
       - name: Compile Extension
         shell: sh
         run: |
-          scons target='${{ matrix.target }}' platform='${{ matrix.platform }}' arch='${{ matrix.arch }}' libpd_lib_dir=libpd/build
+          scons target='${{ matrix.target }}' platform='${{ matrix.platform }}' arch='${{ matrix.arch }}'
+          ls -l demo/addons/bin
+      
+      - name: (macOS) Compile Extension
+        shell: sh
+        run: |
+          scons target='${{ matrix.target }}' platform='${{ matrix.platform }}'
           ls -l demo/addons/bin
           
       - name: (Windows) Move Shared Library Files
@@ -92,13 +117,19 @@ jobs:
         shell: sh
         run: |
           cp /usr/x86_64-w64-mingw32/lib/libwinpthread-1.dll demo/addons/bin
-          cp libpd/build/libpd.dll demo/addons/bin
+          cp libpd/build/libs/libpd.dll demo/addons/bin
           ls -l demo/addons/bin
 
       - name: (Linux) Move Shared Library Files
         if: ${{ startsWith(matrix.identifier, 'linux-') }}
         run: |
-          cp libpd/build/libpd.so demo/addons/bin
+          cp libpd/build/libs/libpd.so demo/addons/bin
+          ls -l demo/addons/bin
+        
+      - name: (macOS) Move Shared Library Files
+        if: ${{ startsWith(matrix.identifier, 'macos-') }}
+        run: |
+          cp libpd/build/libs/libpd.dylib demo/addons/bin
           ls -l demo/addons/bin
       
       - name: Upload Artifact

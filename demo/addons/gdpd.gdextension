@@ -6,18 +6,32 @@ reloadable = true
 
 [libraries]
 
-windows.debug.x86_64 = "res://addons/bin/godotpd.windows.template_debug.x86_64.dll"
-windows.release.x86_64 = "res://addons/bin/godotpd.windows.template_release.x86_64.dll"
+windows.debug.x86_64 = "res://addons/bin/libgodotpd.windows.template_debug.x86_64.dll"
+windows.release.x86_64 = "res://addons/bin/libgodotpd.windows.template_release.x86_64.dll"
+linux.debug.x86_64 = "res://bin/libgodotpd.linux.template_debug.x86_64.so"
+linux.release.x86_64 = "res://bin/libgodotpd.linux.template_release.x86_64.so"
+macos.debug = "res://bin/libgodotpd.macos.template_debug.framework"
+macos.release = "res://bin/libgodotpd.macos.template_release.framework"
 
 [dependencies]
 
 windows.debug = {
     "res://addons/bin/libpd.dll" : "",
-    "res://addons/bin/pthreadVC2.dll" : "",
-    "res://addons/bin/pthreadGC2.dll" : "",
+    "res://addons/bin/libwinpthread-1.dll" : "",
 }
 windows.release = {
     "res://addons/bin/libpd.dll" : "",
-    "res://addons/bin/pthreadVC2.dll" : "",
-    "res://addons/bin/pthreadGC2.dll" : "",
+    "res://addons/bin/libwinpthread-1.dll" : "",
+}
+linux.debug = {
+    "res://addons/bin/libpd.so" : "",
+}
+linux.release = {
+    "res://addons/bin/libpd.dll" : "",
+}
+macos.debug = {
+    "res://addons/bin/libpd.dylib" : "Contents/Frameworks"
+}
+macos.release = {
+   "res://addons/bin/libpd.dylib" : "Contents/Frameworks"
 }

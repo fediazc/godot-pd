@@ -27,9 +27,17 @@ env.Append(CPPPATH=[
 
 sources = Glob("src/*.cpp")
 
-library = env.SharedLibrary(
-    target=os.path.join(main_target_dir, "libgodotpd{}{}".format(env["suffix"], env["SHLIBSUFFIX"])),
-    source=sources,
-)
+if env["platform"] == "macos":
+    library = env.SharedLibrary(
+        target="demo/bin/libgodotpd.{}.{}.framework/libgodotpd.{}.{}".format(
+            env["platform"], env["target"], env["platform"], env["target"]
+        ),
+        source=sources,
+    )
+else:
+    library = env.SharedLibrary(
+        target=os.path.join(main_target_dir, "libgodotpd{}{}".format(env["suffix"], env["SHLIBSUFFIX"])),
+        source=sources,
+    )
 
 Default(library)
