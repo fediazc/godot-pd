@@ -45,11 +45,12 @@ jobs:
 
       - name: Install Python
         uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
       
       - name: Install SCons
         shell: bash
         run: |
-          python -c "import sys; print(sys.version)"
           python -m pip install scons
           scons --version
         
@@ -85,6 +86,18 @@ jobs:
         run: |
           scons target='${{ matrix.target }}' platform='${{ matrix.platform }}' arch='${{ matrix.arch }}' libpd_lib_dir=libpd/build
           ls -l demo/addons/bin
+          
+      - name: (Windows) Move .dll Files
+        if: ${{ startsWith(matrix.identifier, 'windows-') }}
+        shell: sh
+        run: |
+          cp /usr/x86_64-w64-mingw32/lib/libwinpthread-1.dll demo/addons/bin
+          cp libpd/build/libpd.dll demo/addons/bin
+
+      - name: (Linux) Move .so Files
+        if: ${{ startsWith(matrix.identifier, 'linux-') }}
+        run: |
+          cp libpd/build/libpd.so demo/addons/bin
       
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
