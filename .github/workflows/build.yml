@@ -1,6 +1,5 @@
 name: Build
 on:
-  push:
   pull_request:
 
 jobs:
@@ -70,7 +69,6 @@ jobs:
           ls -l
       
       - name: (Linux) Compile libpd
-        if: ${{ startsWith(matrix.identifier, 'windows-') }}
         shell: sh
         run: |
           cd libpd
