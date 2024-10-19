@@ -87,17 +87,19 @@ jobs:
           scons target='${{ matrix.target }}' platform='${{ matrix.platform }}' arch='${{ matrix.arch }}' libpd_lib_dir=libpd/build
           ls -l demo/addons/bin
           
-      - name: (Windows) Move .dll Files
+      - name: (Windows) Move Shared Library Files
         if: ${{ startsWith(matrix.identifier, 'windows-') }}
         shell: sh
         run: |
           cp /usr/x86_64-w64-mingw32/lib/libwinpthread-1.dll demo/addons/bin
           cp libpd/build/libpd.dll demo/addons/bin
+          ls -l demo/addons/bin
 
-      - name: (Linux) Move .so Files
+      - name: (Linux) Move Shared Library Files
         if: ${{ startsWith(matrix.identifier, 'linux-') }}
         run: |
           cp libpd/build/libpd.so demo/addons/bin
+          ls -l demo/addons/bin
       
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
