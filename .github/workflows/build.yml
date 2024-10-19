@@ -43,13 +43,13 @@ jobs:
             runner: macos-14
             target: template_debug
             platform: macos
-            build-type: Debug
+            is-debug: true
           - identifier: macos-release
             name: macOS Release
             runner: macos-14
             target: template_release
             platform: macos
-            build-type: Release
+            is-debug: false
 
     steps:
       - name: (Windows) Install mingw64
@@ -89,8 +89,8 @@ jobs:
           mv liblibpd.dll.a libpd.a
           ls -l
       
-      - name: (Linux & macOS) Compile libpd
-        if: ${{ !startsWith(matrix.identifier, 'windows-') }}
+      - name: (Linux) Compile libpd
+        if: ${{ startsWith(matrix.identifier, 'linux-') }}
         shell: sh
         run: |
           cd libpd
@@ -99,6 +99,15 @@ jobs:
           cmake --build .
           cd libs
           ls -l
+
+      - name: (macOS) Compile libpd
+        if: ${{ startsWith(matrix.identifier, 'macos-') }}
+        shell: sh
+        run: |
+          cd libpd
+          make STATIC=true DEBUG=${{ matrix.is-debug }}
+          cd libs
+          ls -l      
 
       - name: Compile Extension
         shell: sh
@@ -109,7 +118,7 @@ jobs:
       - name: (macOS) Compile Extension
         shell: sh
         run: |
-          scons target='${{ matrix.target }}' platform='${{ matrix.platform }}'
+          scons target='${{ matrix.target }}' platform='${{ matrix.platform }}' -libpd_lib_dir=libpd/libs
           ls -l demo/addons/bin
           
       - name: (Windows) Move Shared Library Files
@@ -129,7 +138,7 @@ jobs:
       - name: (macOS) Move Shared Library Files
         if: ${{ startsWith(matrix.identifier, 'macos-') }}
         run: |
-          cp libpd/build/libs/libpd.dylib demo/addons/bin
+          cp libpd/libs/libpd.dylib demo/addons/bin
           ls -l demo/addons/bin
       
       - name: Upload Artifact
