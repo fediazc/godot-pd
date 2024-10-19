@@ -82,7 +82,7 @@ jobs:
       - name: Compile Extension
         shell: sh
         run: |
-          scons target='${{ matrix.target }}' platform='{{ $matrix.platform }}' arch='${{ matrix.arch }}' libpd_lib_dir=libpd/build
+          scons target='${{ matrix.target }}' platform='${{ matrix.platform }}' arch='${{ matrix.arch }}' libpd_lib_dir=libpd/build
           ls -l demo/addons/bin
       
       - name: Upload Artifact
