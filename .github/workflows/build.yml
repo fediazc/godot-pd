@@ -17,6 +17,8 @@ jobs:
             platform: linux
             arch: x86_64
             build-type: Debug
+            libpd-lib-dir: libpd/build/libs/
+            suffix: .so
           - identifier: linux-release
             name: Linux Release
             runner: ubuntu-22.04
@@ -24,6 +26,8 @@ jobs:
             platform: linux
             arch: x86_64
             build-type: Release
+            libpd-lib-dir: libpd/build/libs/
+            suffix: .so
           - identifier: windows-debug
             name: Windows Debug
             runner: ubuntu-22.04
@@ -31,6 +35,8 @@ jobs:
             platform: windows
             arch: x86_64
             build-type: Debug
+            libpd-lib-dir: libpd/build/libs/
+            suffix: .dll
           - identifier: windows-release
             name: Windows Release
             runner: ubuntu-22.04
@@ -38,18 +44,26 @@ jobs:
             platform: windows
             arch: x86_64
             build-type: Release
+            libpd-lib-dir: libpd/build/libs/
+            suffix: .dll
           - identifier: macos-debug
             name: macOS Debug
             runner: macos-14
             target: template_debug
             platform: macos
+            arch: ''
             is-debug: true
+            libpd-lib-dir: libpd/libs/
+            suffix: .dylib
           - identifier: macos-release
             name: macOS Release
             runner: macos-14
             target: template_release
             platform: macos
+            arch: ''
             is-debug: false
+            libpd-lib-dir: libpd/libs/
+            suffix: .dylib
 
     steps:
       - name: (Windows) Install mingw64
@@ -66,7 +80,7 @@ jobs:
           python-version: 3.12
       
       - name: Install SCons
-        shell: bash
+        shell: sh
         run: |
           python -m pip install scons
           scons --version
@@ -91,7 +105,6 @@ jobs:
       
       - name: (Linux) Compile libpd
         if: ${{ startsWith(matrix.identifier, 'linux-') }}
-        shell: sh
         run: |
           cd libpd
           mkdir build && cd build
@@ -102,7 +115,6 @@ jobs:
 
       - name: (macOS) Compile libpd
         if: ${{ startsWith(matrix.identifier, 'macos-') }}
-        shell: sh
         run: |
           cd libpd
           make STATIC=true DEBUG=${{ matrix.is-debug }}
@@ -112,33 +124,19 @@ jobs:
       - name: Compile Extension
         shell: sh
         run: |
-          scons target='${{ matrix.target }}' platform='${{ matrix.platform }}' arch='${{ matrix.arch }}'
-          ls -l demo/addons/bin
-      
-      - name: (macOS) Compile Extension
-        shell: sh
-        run: |
-          scons target='${{ matrix.target }}' platform='${{ matrix.platform }}' -libpd_lib_dir=libpd/libs
+          scons target='${{ matrix.target }}' platform='${{ matrix.platform }}' arch='${{ matrix.arch }}' libpd_lib_dir=${{ matrix.libpd-lib-dir }}
           ls -l demo/addons/bin
           
-      - name: (Windows) Move Shared Library Files
+      - name: (Windows) Move pthread DLL
         if: ${{ startsWith(matrix.identifier, 'windows-') }}
         shell: sh
         run: |
           cp /usr/x86_64-w64-mingw32/lib/libwinpthread-1.dll demo/addons/bin
-          cp libpd/build/libs/libpd.dll demo/addons/bin
-          ls -l demo/addons/bin
 
-      - name: (Linux) Move Shared Library Files
-        if: ${{ startsWith(matrix.identifier, 'linux-') }}
+      - name: Move Shared Library Files
+        shell: sh
         run: |
-          cp libpd/build/libs/libpd.so demo/addons/bin
-          ls -l demo/addons/bin
-        
-      - name: (macOS) Move Shared Library Files
-        if: ${{ startsWith(matrix.identifier, 'macos-') }}
-        run: |
-          cp libpd/libs/libpd.dylib demo/addons/bin
+          cp ${{ format('{0}libpd{1}', matrix.libpd-lib-dir, matrix.suffix) }} demo/addons/bin
           ls -l demo/addons/bin
       
       - name: Upload Artifact
