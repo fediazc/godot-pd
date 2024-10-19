@@ -3,7 +3,6 @@ import os
 from glob import glob
 
 libpd_lib_dir = ARGUMENTS.pop("libpd_lib_dir", "libpd/build/libs")
-pthread_dll_path = ARGUMENTS.pop("pthread_dll_path", "")
 pd_multi = ARGUMENTS.pop("pd_multi", False)
 
 env = SConscript("godot-cpp/SConstruct")
@@ -29,29 +28,8 @@ env.Append(CPPPATH=[
 sources = Glob("src/*.cpp")
 
 library = env.SharedLibrary(
-    target=os.path.join(main_target_dir, "godotpd{}{}".format(env["suffix"], env["SHLIBSUFFIX"])),
+    target=os.path.join(main_target_dir, "libgodotpd{}{}".format(env["suffix"], env["SHLIBSUFFIX"])),
     source=sources,
 )
 
 Default(library)
-
-shared_libs = []
-if env["platform"] == "windows":
-    shared_libs += glob(os.path.join(pthread_dll_dir, "*.dll"))
-    libpd_dll = "libpd" + ("-multi" if pd_multi else "") + ".dll"
-    shared_libs.append(os.path.join(libpd_lib_dir, libpd_dll))
-
-    if pthread_dll_path:
-        shared_libs.append(pthread_dll_path)
-else:
-    libpd_so = "libpd" + ("-multi" if pd_multi else "") + ".so"
-    shared_libs.append(os.path.join(libpd_lib_dir, libpd_so))
-
-for path in shared_libs:
-    copy_target = env.Command(
-        target=os.path.join(main_target_dir, os.path.basename(path)),
-        source=path,
-        action=Copy("$TARGET", "$SOURCE")
-    )
-
-    Default(copy_target)
