@@ -63,12 +63,15 @@ jobs:
         shell: sh
         run: |
           cd libpd
+          echo 'set(CMAKE_SHARED_LIBRARY_PREFIX "")' >> CMakeLists.txt
           mkdir build && cd build
           cmake .. -DCMAKE_TOOLCHAIN_FILE=../../toolchain-mingw-x86_64-w64.cmake
           cmake --build .
+          mv liblibpd.dll.a libpd.a
           ls -l
       
       - name: (Linux) Compile libpd
+        if: ${{ startsWith(matrix.identifier, 'linux-') }}
         shell: sh
         run: |
           cd libpd
@@ -86,6 +89,6 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event.repository.name }}
+          name: ${{ format('godot-pd_{0}', matrix.identifier) }}
           path: |
             ${{ github.workspace }}/demo/addons/
