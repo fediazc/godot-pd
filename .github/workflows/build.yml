@@ -154,23 +154,24 @@ jobs:
     steps:
       - name: Checkout Project
         uses: actions/checkout@v4
+      
+      - run: mkdir -p godot-pd-release/bin/
 
       - name: Download All Artifacts
         uses: actions/download-artifact@v4
         with:
-          path: ${{ github.workspace }}/godot-pd-release/
+          path: godot-pd-release/bin/
           pattern: godot-pd-binaries_*
           merge-multiple: true
-
-      - name: Move Files
-        run: |
-          cd godot-pd-release
-          mkdir bin
-          mv !(bin) bin
-          mv ../demo/addons/gdpd.gdextension .
       
+      - run: ls -l godot-pd-release/bin/
+
+      - run: |
+          mv demo/addons/gdpd.gdextension godot-pd-release/
+          ls -l godot-pd-release/
+          
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: godot-pd-release
-          path: ${{ github.workspace }}/godot-pd-release/
+          path: godot-pd-release/
