@@ -29,9 +29,7 @@ sources = Glob("src/*.cpp")
 
 if env["platform"] == "macos":
     library = env.SharedLibrary(
-        target="demo/bin/libgodotpd.{}.{}.framework/libgodotpd.{}.{}".format(
-            env["platform"], env["target"], env["platform"], env["target"]
-        ),
+        target=os.path.join(main_target_dir, "libgodotpd.{}.{}.framework/libgodotpd.{}.{}".format(env["platform"], env["target"], env["platform"], env["target"])),
         source=sources,
     )
 else:
