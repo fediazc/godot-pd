@@ -18,7 +18,7 @@ jobs:
             arch: x86_64
             build-type: Debug
             libpd-lib-dir: libpd/build/libs/
-            target-dir: demo/addons/bin/
+            target-dir: demo/addons/godot-pd/bin/
             suffix: .so
           - identifier: linux-release
             name: Linux Release
@@ -28,7 +28,7 @@ jobs:
             arch: x86_64
             build-type: Release
             libpd-lib-dir: libpd/build/libs/
-            target-dir: demo/addons/bin/
+            target-dir: demo/addons/godot-pd/bin/
             suffix: .so
           - identifier: windows-debug
             name: Windows Debug
@@ -38,7 +38,7 @@ jobs:
             arch: x86_64
             build-type: Debug
             libpd-lib-dir: libpd/build/libs/
-            target-dir: demo/addons/bin/
+            target-dir: demo/addons/godot-pd/bin/
             suffix: .dll
           - identifier: windows-release
             name: Windows Release
@@ -48,7 +48,7 @@ jobs:
             arch: x86_64
             build-type: Release
             libpd-lib-dir: libpd/build/libs/
-            target-dir: demo/addons/bin/
+            target-dir: demo/addons/godot-pd/bin/
             suffix: .dll
           - identifier: macos-debug
             name: macOS Debug
@@ -58,7 +58,7 @@ jobs:
             arch: ''
             build-type: Debug
             libpd-lib-dir: libpd/build/libs/
-            target-dir: demo/addons/bin/libgodotpd.macos.template_debug.framework/
+            target-dir: demo/addons/godot-pd/bin/libgodotpd.macos.template_debug.framework/
             suffix: .dylib
           - identifier: macos-release
             name: macOS Release
@@ -68,7 +68,7 @@ jobs:
             arch: ''
             build-type: Release
             libpd-lib-dir: libpd/build/libs/
-            target-dir: demo/addons/bin/libgodotpd.macos.template_release.framework/
+            target-dir: demo/addons/godot-pd/bin/libgodotpd.macos.template_release.framework/
             suffix: .dylib
 
     steps:
@@ -145,7 +145,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ format('godot-pd-binaries_{0}', matrix.identifier) }}
-          path: ${{ github.workspace }}/demo/addons/bin
+          path: ${{ github.workspace }}/demo/addons/godot-pd/bin
 
   merge-artifacts:
     needs: build
@@ -155,20 +155,20 @@ jobs:
       - name: Checkout Project
         uses: actions/checkout@v4
       
-      - run: mkdir -p godot-pd-release/bin/
+      - run: mkdir -p godot-pd-release/godot-pd/bin/
 
       - name: Download All Artifacts
         uses: actions/download-artifact@v4
         with:
-          path: godot-pd-release/bin/
+          path: godot-pd-release/godot-pd/bin/
           pattern: godot-pd-binaries_*
           merge-multiple: true
       
-      - run: ls -l godot-pd-release/bin/
+      - run: ls -l godot-pd-release/godot-pd/bin/
 
       - run: |
-          mv demo/addons/gdpd.gdextension godot-pd-release/
-          ls -l godot-pd-release/
+          mv demo/addons/godot-pd/godot-pd.gdextension godot-pd-release/godot-pd/
+          ls -l godot-pd-release/godot-pd/
           
       - name: Upload Artifact
         uses: actions/upload-artifact@v4

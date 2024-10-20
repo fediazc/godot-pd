@@ -7,8 +7,7 @@ pd_multi = ARGUMENTS.pop("pd_multi", False)
 
 env = SConscript("godot-cpp/SConstruct")
 
-main_target_dir = "demo/addons/bin"
-pthread_dll_dir = "3rdparty/pthreads-win32/dll/" + "x64" if env["arch"] == "x86_64" else "x86"
+main_target_dir = "demo/addons/godot-pd/bin"
 
 if pd_multi:
     env.Append(CPPDEFINES="PDINSTANCE")
