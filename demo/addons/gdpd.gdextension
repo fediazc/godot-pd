@@ -8,10 +8,10 @@ reloadable = true
 
 windows.debug.x86_64 = "res://addons/bin/libgodotpd.windows.template_debug.x86_64.dll"
 windows.release.x86_64 = "res://addons/bin/libgodotpd.windows.template_release.x86_64.dll"
-linux.debug.x86_64 = "res://bin/libgodotpd.linux.template_debug.x86_64.so"
-linux.release.x86_64 = "res://bin/libgodotpd.linux.template_release.x86_64.so"
-macos.debug = "res://bin/libgodotpd.macos.template_debug.framework"
-macos.release = "res://bin/libgodotpd.macos.template_release.framework"
+linux.debug.x86_64 = "res://addons/bin/libgodotpd.linux.template_debug.x86_64.so"
+linux.release.x86_64 = "res://addons/bin/libgodotpd.linux.template_release.x86_64.so"
+macos.debug = "res://addons/bin/libgodotpd.macos.template_debug.framework"
+macos.release = "res://addons/bin/libgodotpd.macos.template_release.framework"
 
 [dependencies]
 

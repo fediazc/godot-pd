@@ -28,6 +28,7 @@ env.Append(CPPPATH=[
 sources = Glob("src/*.cpp")
 
 if env["platform"] == "macos":
+    env.Append(LINKFLAGS=['-rpath', '@loader_path'])
     library = env.SharedLibrary(
         target=os.path.join(main_target_dir, "libgodotpd.{}.{}.framework/libgodotpd.{}.{}".format(env["platform"], env["target"], env["platform"], env["target"])),
         source=sources,
