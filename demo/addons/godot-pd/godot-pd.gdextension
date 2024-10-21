@@ -1,0 +1,31 @@
+[configuration]
+
+entry_symbol = "godotpd_init"
+compatibility_minimum = "4.3"
+reloadable = true
+
+[libraries]
+
+windows.debug.x86_64 = "res://addons/godot-pd/bin/libgodotpd.windows.template_debug.x86_64.dll"
+windows.release.x86_64 = "res://addons/godot-pd/bin/libgodotpd.windows.template_release.x86_64.dll"
+linux.debug.x86_64 = "res://addons/godot-pd/bin/libgodotpd.linux.template_debug.x86_64.so"
+linux.release.x86_64 = "res://addons/godot-pd/bin/libgodotpd.linux.template_release.x86_64.so"
+macos.debug = "res://addons/godot-pd/bin/libgodotpd.macos.template_debug.framework"
+macos.release = "res://addons/godot-pd/bin/libgodotpd.macos.template_release.framework"
+
+[dependencies]
+
+windows.debug = {
+    "res://addons/godot-pd/bin/libpd.dll" : "",
+    "res://addons/godot-pd/bin/libwinpthread-1.dll" : "",
+}
+windows.release = {
+    "res://addons/godot-pd/bin/libpd.dll" : "",
+    "res://addons/godot-pd/bin/libwinpthread-1.dll" : "",
+}
+linux.debug = {
+    "res://addons/godot-pd/bin/libpd.so" : "",
+}
+linux.release = {
+    "res://addons/godot-pd/bin/libpd.so" : "",
+}
