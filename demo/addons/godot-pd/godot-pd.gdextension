@@ -29,3 +29,7 @@ linux.debug = {
 linux.release = {
     "res://addons/godot-pd/bin/libpd.so" : "",
 }
+
+[icons]
+
+AudioStreamPD = "res://addons/godot-pd/icons/audio_stream_pd.svg"

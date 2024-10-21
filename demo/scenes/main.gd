@@ -8,8 +8,8 @@ var playing = false
 func _ready():
 	begin_playback()
 	pd_playback.add_patch("test-array.pd", "./pd")
-	var sz := pd_playback.get_array_size("array")
-	var arr := pd_playback.read_array("array")
+	var sz = pd_playback.get_array_size("array")
+	var arr = pd_playback.read_array("array")
 	print("%d element array before write: %s" % [sz, arr])
 	pd_playback.write_array("array", [1, 2, 3, 4, 5])
 	arr = pd_playback.read_array("array")

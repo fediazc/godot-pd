@@ -1,8 +1,6 @@
 name: Build
 on:
   push:
-    paths-ignore:
-      - 'README.md'
   pull_request:
 
 jobs:
@@ -158,20 +156,27 @@ jobs:
       - name: Checkout Project
         uses: actions/checkout@v4
       
-      - run: mkdir -p godot-pd-release/godot-pd/bin/
+      - name: Create Release Folder
+        run: |
+          mkdir -p godot-pd-release/addons/godot-pd/bin/
+          mkdir -p godot-pd-release/addons/godot-pd/icons/
 
       - name: Download All Artifacts
         uses: actions/download-artifact@v4
         with:
-          path: godot-pd-release/godot-pd/bin/
+          path: godot-pd-release/addons/godot-pd/bin/
           pattern: godot-pd-binaries_*
           merge-multiple: true
-      
-      - run: ls -l godot-pd-release/godot-pd/bin/
 
-      - run: |
-          mv demo/addons/godot-pd/godot-pd.gdextension godot-pd-release/godot-pd/
-          ls -l godot-pd-release/godot-pd/
+      - name: Move Files
+        run: |
+          cp demo/addons/godot-pd/godot-pd.gdextension godot-pd-release/addons/godot-pd/
+          cp README.md godot-pd-release/addons/godot-pd/
+          cp LICENSE.txt godot-pd-release/addons/godot-pd/
+          cp demo/addons/godot-pd/icons/audio_stream_pd.svg godot-pd-release/addons/godot-pd/icons/
+          ls -l godot-pd-release/addons/godot-pd/
+          ls -l godot-pd-release/addons/godot-pd/bin/
+          ls -l godot-pd-release/addons/godot-pd/icons/
           
       - name: Upload Artifact
         uses: actions/upload-artifact@v4

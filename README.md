@@ -6,11 +6,11 @@ Latest tested Godot version: **4.3 stable**.
 
 ## Installation
 
-See [compiling from source](#compiling-from-source).
+See [building from source](#building-from-source).
 
 ## Overview
 
-To begin using godot-pd, first create an `AudioStreamPlayer` node, and set an `AudioStreamPD` as its `stream` property in the inspector. Call `play()` on the `AudioStreamPlayer` node, then call `get_stream_playback()`. The `AudioStreamPlaybackPD` object returned by `get_stream_playback()` is your main handle for interacting with Pure Data.
+To begin using godot-pd, first create an `AudioStreamPlayer` node, and assign an `AudioStreamPD` as its `stream` property in the inspector. Call `play()` on the `AudioStreamPlayer` node, and then call `get_stream_playback()`. The `AudioStreamPlaybackPD` object returned by `get_stream_playback()` is your main handle for interacting with Pure Data.
 
 For more details, please see the documentation for both `AudioStreamPlaybackPD` and `AudioStreamPD`. Also see [issues and limitations](#issues-and-limitations).
 
@@ -51,35 +51,38 @@ The [releases](https://github.com/fediazc/godot-pd/releases) for godot-pd are (w
 
 To avoid these types of issues, it's recommended that you only use a single `AudioStreamPlayer` to interact with Pure Data, through an [autoload](https://docs.godotengine.org/en/stable/tutorials/scripting/singletons_autoload.html).
 
-If you need to get around these limitations for your project, you can [compile godot-pd](#compiling-from-source) with multi-instance support enabled, but keep in mind that this has not been tested.
+If you need to get around these limitations for your project, you can [compile godot-pd](#building-from-source) with multiple-instance support enabled, but keep in mind that this has not been tested.
 
-## Compiling from source
+## Building from source
 
-- Clone the repository and initialize submodules:
+1. Clone the repository and initialize submodules:
 
 ```
 git clone --recurse-submodules https://github.com/fediazc/godot-pd.git
 ```
 
-- Install the tools necessary for compiling Godot. You **will NOT** need to compile Godot, but they are the same tools you need to compile this extension. See [Godot docs: Building from source](https://docs.godotengine.org/en/stable/contributing/development/compiling/index.html#toc-devel-compiling) for details.
-- Build libpd. Please see the [libpd repo](https://github.com/libpd/libpd) for details. By default, the `libpd/build/libs` folder will be searched for the build files. You can specify a different location by passing `libpd_lib_dir` as an argument to SCons:
+2. Install the tools necessary for compiling Godot. You **will NOT** need to compile Godot, but they are the same tools you need to compile this extension. See [Godot docs: Building from source](https://docs.godotengine.org/en/stable/contributing/development/compiling/index.html#toc-devel-compiling) for details.
+3. Build libpd. Please see the [libpd repo](https://github.com/libpd/libpd) for details. By default, the build files will be searched for in the `libpd/build/libs` folder. You can specify a different location by passing `libpd_lib_dir` as an argument to SCons:
 
 ```
 scons libpd_lib_dir=path/to/libpd/libs
 ```
 
-> [!NOTE]
-> If you're [building libpd for Windows using CMake](https://github.com/libpd/libpd#building-with-cmake), a prebuilt copy of the required pthread library is located in this repo at `3rdpary/pthreads-win32`. It's assumed you are using these files (or at least the same pthread library) for your libpd build. If you're using a different library, you can specify the location of the .dll file by passing a path to SCons with the `pthread_dll_path` option, so that it's copied over to the final build folder. You will also need to manually add this file to the dependencies section of the `gdpd.gdextension` file so it's exported along with your project. Please see [Godot docs: the .gdextension file](https://docs.godotengine.org/en/stable/tutorials/scripting/gdextension/gdextension_file.html#dependencies-section) for more details.
-
-- Finally, run SCons from the project root:
+4. Run SCons from the project root:
 
 ```
 scons platform=<platform>
 ```
 
-The completed build can be found in `demo/addons/`. To use with your own Godot project, copy the `addons/` into your project folder.
+5. Once the build finishes, you will need to copy the libpd dynamic library files (libpd.dll, libpd.so, or libpd.dylib, depending on your platform) to `demo/addons/godot-pd/bin/` 
+    - **If you are building for macOS**, this folder will be `demo/addons/godot-pd/bin/libgodotpd.macos.<target>.framework/` instead, where `<target>` will be either `template_release` or `template_debug`.
+    - **If you are building for Windows**, you will also need to copy the pthread library used to build libpd. If you compiled libpd with MinGW, the library is likely libwinpthread-1.dll; if you used Visual Studio, it is likely pthreadVC2.dll.
 
-### Compiling with multiple-instance support
+6. Finally, ensure the paths in `demo/addons/godot-pd/godot-pd.gdextension` are correct. This file assumes you followed the previous steps and used MinGW to compile for Windows. For more details about .gdextension files, please see the [Godot docs](https://docs.godotengine.org/en/stable/tutorials/scripting/gdextension/gdextension_file.html).
+
+To use the extension in your project, copy the `addons/` folder from `demo/` directory into the root of your project folder.
+
+### Building with multiple instance support
 
 Please keep in mind that libpd multiple-instance support has not been tested with this extension.
 
