@@ -5,7 +5,7 @@
 	</brief_description>
 	<description>
 		[AudioStreamPD] receives audio data from Pure Data (Pd) patches. Please see [AudioStreamPlaybackPD], as it contains most of the methods for interacting with Pd (opening patches, sending messages, etc...).
-		[b]Warning[/b]: Multiple AudioStreamPD objects share the same instance of Pd. That is, [b]there is only one instance of Pd running at any given moment[/b]. You will probably get unexpected behavior if you try using two or more AudioStreamPDs at the same time. For this reason, it's recommended that you only use a single [AudioStreamPlayer] to interact with Pd, through an [url=https://docs.godotengine.org/en/stable/tutorials/scripting/singletons_autoload.html]autoload[/url] scene.
+		[b]Warning[/b]: Multiple AudioStreamPD objects share the same instance of Pd. That is, [b]there is only one instance of Pd running at any given moment[/b]. You will probably get unexpected behavior if you try using two or more AudioStreamPD objects at the same time. For this reason, it's recommended that you only use a single [AudioStreamPlayer] to interact with Pd, through an [url=https://docs.godotengine.org/en/stable/tutorials/scripting/singletons_autoload.html]autoload[/url] scene.
 		Here's an overview of the basic operations:
 		[codeblocks]
 		[gdscript]
@@ -38,7 +38,7 @@
 			# do something with num...
 		[/gdscript]
 		[/codeblocks]
-		[b]Note[/b]: The following are the valid value ranges for MIDI messages. *Incoming* messages from Pd are clamped to these values.
+		[b]Note[/b]: The following are the valid value ranges for MIDI messages. If a MIDI message contains values outside this range, it will be silently ignored. Incoming MIDI messages from Pd have their values clamped to these ranges. 
 		[codeblocks]
 		[gdscript]
 			# channel: device #0 -> 0 - 15, device #1 -> 16-31, etc

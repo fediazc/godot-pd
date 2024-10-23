@@ -18,7 +18,10 @@ void initialize_godotpd(ModuleInitializationLevel p_level) {
 	GDREGISTER_CLASS(AudioStreamPlaybackPD)
 
 #ifndef PDINSTANCE
-	Engine::get_singleton()->register_singleton("MainPlaybackPD", memnew(AudioStreamPlaybackPD));
+	auto engine = Engine::get_singleton();
+	if (!engine->has_singleton("_MainPlaybackPD")) {
+		engine->register_singleton("_MainPlaybackPD", memnew(AudioStreamPlaybackPD));
+	}
 #endif
 }
 

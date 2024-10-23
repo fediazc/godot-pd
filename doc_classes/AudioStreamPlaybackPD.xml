@@ -5,8 +5,9 @@
 	</brief_description>
 	<description>
 		[AudioStreamPlaybackPD] is your main handle for interacting with Pure Data (Pd). It is meant to be used with [AudioStreamPD].
+		[b]Note[/b]: There is a singleton named [b]_MainPlaybackPD[/b], which all [AudioStreamPD] resources use. It's [b]not[/b] recommended to interact with this singleton directly. Instead, call [method AudioStreamPlayer.get_stream_playback]. This ensures Pd is properly initialized before you start using it.
 		[b]Note[/b]: Before being able to receive messages coming from Pd through signals ([signal receive_bang], [signal receive_float], etc), you have to [method subscribe] to some message sources first.
-		[b]Note[/b]: See the description of [AudioStreamPD] for information on valid value ranges for MIDI messages. All values incoming from Pd are clamped to these ranges. 
+		[b]Note[/b]: See the description of [AudioStreamPD] for information on valid value ranges for MIDI messages.
 	</description>
 	<tutorials>
 	</tutorials>

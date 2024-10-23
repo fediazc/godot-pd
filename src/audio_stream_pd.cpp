@@ -27,7 +27,7 @@ Ref<AudioStreamPlayback> AudioStreamPD::_instantiate_playback() const {
 
 	playback.instantiate();
 #else
-	auto playback = Ref<AudioStreamPlaybackPD>(Engine::get_singleton()->get_singleton("MainPlaybackPD"));
+	auto playback = Ref<AudioStreamPlaybackPD>(Engine::get_singleton()->get_singleton("_MainPlaybackPD"));
 #endif
 
 	playback->stream = this;

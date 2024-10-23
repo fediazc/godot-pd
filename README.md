@@ -1,6 +1,6 @@
 # godot-pd
 
-GDExtension that allows you to interact with and play [Pure Data](https://puredata.info/) patches in Godot.
+GDExtension that allows you to interact with and run [Pure Data](https://puredata.info/) patches in Godot.
 
 Currently uses Pure Data version **0.54-1**.
 
@@ -47,11 +47,9 @@ func _on_receive_float(dest: String, num: float):
 
 ```
 
-## Issues and limitations
+## Limitations
 
-The [releases](https://github.com/fediazc/godot-pd/releases) for godot-pd are (will be) compiled **without** multiple-instance support for libpd. Every `AudioStreamPD` resource will use **the same instance of Pure Data**. If, for example, you stop playback from one `AudioStreamPlayer` node, **all audio from Pure Data will be stopped** even if other `AudioStreamPlayer` nodes are still running.
-
-To avoid these types of issues, it's recommended that you only use a single `AudioStreamPlayer` to interact with Pure Data, through an [autoload] scene(https://docs.godotengine.org/en/stable/tutorials/scripting/singletons_autoload.html).
+The [releases](https://github.com/fediazc/godot-pd/releases) for godot-pd are (will be) compiled **without** multiple-instance support for libpd. Every `AudioStreamPD` resource will use **the same instance of Pure Data**. You will probably get unexpected behavior if you try using two or more `AudioStreamPD` objects at the same time. For this reason, it's recommended that you only use a single `AudioStreamPlayer` to interact with Pure Data, through an [autoload](https://docs.godotengine.org/en/stable/tutorials/scripting/singletons_autoload.html) scene.
 
 If you need to get around these limitations for your project, you can [compile godot-pd](#building-from-source) with multiple-instance support enabled, but keep in mind that this has not been tested.
 
