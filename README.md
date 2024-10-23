@@ -2,6 +2,8 @@
 
 GDExtension that allows you to interact with and play [Pure Data](https://puredata.info/) patches in Godot.
 
+Currently uses Pure Data version **0.54-1**.
+
 Latest tested Godot version: **4.3 stable**.
 
 ## Installation
@@ -12,7 +14,7 @@ See [building from source](#building-from-source).
 
 To begin using godot-pd, first create an `AudioStreamPlayer` node, and assign an `AudioStreamPD` as its `stream` property in the inspector. Call `play()` on the `AudioStreamPlayer` node, and then call `get_stream_playback()`. The `AudioStreamPlaybackPD` object returned by `get_stream_playback()` is your main handle for interacting with Pure Data.
 
-For more details, please see the documentation for both `AudioStreamPlaybackPD` and `AudioStreamPD`. Also see [issues and limitations](#issues-and-limitations).
+For more details, please see the in-editor documentation for both `AudioStreamPlaybackPD` and `AudioStreamPD`.
 
 ```GDScript
 @onready var player: AudioStreamPlayer = $AudioStreamPlayer
@@ -25,7 +27,7 @@ func _ready():
     pd = player.get_stream_playback()
     
     # playing patches
-    pd.add_patch("example.pd", "./")
+    pd.open_patch("example.pd")
 
     # sending messages
     pd.send_bang("start-loop")
@@ -49,7 +51,7 @@ func _on_receive_float(dest: String, num: float):
 
 The [releases](https://github.com/fediazc/godot-pd/releases) for godot-pd are (will be) compiled **without** multiple-instance support for libpd. Every `AudioStreamPD` resource will use **the same instance of Pure Data**. If, for example, you stop playback from one `AudioStreamPlayer` node, **all audio from Pure Data will be stopped** even if other `AudioStreamPlayer` nodes are still running.
 
-To avoid these types of issues, it's recommended that you only use a single `AudioStreamPlayer` to interact with Pure Data, through an [autoload](https://docs.godotengine.org/en/stable/tutorials/scripting/singletons_autoload.html).
+To avoid these types of issues, it's recommended that you only use a single `AudioStreamPlayer` to interact with Pure Data, through an [autoload] scene(https://docs.godotengine.org/en/stable/tutorials/scripting/singletons_autoload.html).
 
 If you need to get around these limitations for your project, you can [compile godot-pd](#building-from-source) with multiple-instance support enabled, but keep in mind that this has not been tested.
 
@@ -61,7 +63,7 @@ If you need to get around these limitations for your project, you can [compile g
 git clone --recurse-submodules https://github.com/fediazc/godot-pd.git
 ```
 
-2. Install the tools necessary for compiling Godot. You **will NOT** need to compile Godot, but they are the same tools you need to compile this extension. See [Godot docs: Building from source](https://docs.godotengine.org/en/stable/contributing/development/compiling/index.html#toc-devel-compiling) for details.
+2. Install the tools necessary for compiling Godot. You will **not** need to compile Godot, but they are the same tools you need to compile this extension. See [Godot docs: Building from source](https://docs.godotengine.org/en/stable/contributing/development/compiling/index.html#toc-devel-compiling) for details.
 3. Build libpd. Please see the [libpd repo](https://github.com/libpd/libpd) for details. By default, the build files will be searched for in the `libpd/build/libs` folder. You can specify a different location by passing `libpd_lib_dir` as an argument to SCons:
 
 ```

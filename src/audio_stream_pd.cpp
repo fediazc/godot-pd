@@ -1,11 +1,13 @@
 #include "audio_stream_pd.h"
 #include "util.hpp"
 #include <algorithm>
+#include <filesystem>
 #include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/error_macros.hpp>
 
 using namespace godot;
+namespace fs = std::filesystem;
 
 void AudioStreamPD::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_mix_rate", "mix_rate"), &AudioStreamPD::set_mix_rate);
@@ -44,13 +46,14 @@ int AudioStreamPD::get_mix_rate() const {
 //////////////
 
 void AudioStreamPlaybackPD::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("add_patch", "filename", "path"), &AudioStreamPlaybackPD::add_patch);
-	ClassDB::bind_method(D_METHOD("remove_patch", "filename", "path"), &AudioStreamPlaybackPD::remove_patch);
+	ClassDB::bind_method(D_METHOD("open_patch", "path"), &AudioStreamPlaybackPD::open_patch);
+	ClassDB::bind_method(D_METHOD("close_patch", "path"), &AudioStreamPlaybackPD::close_patch);
+	ClassDB::bind_method(D_METHOD("close_patch_id", "dollar_zero"), &AudioStreamPlaybackPD::close_patch_id);
 	ClassDB::bind_method(D_METHOD("send_bang", "dest"), &AudioStreamPlaybackPD::send_bang);
 	ClassDB::bind_method(D_METHOD("send_float", "dest", "value"), &AudioStreamPlaybackPD::send_float);
 	ClassDB::bind_method(D_METHOD("send_symbol", "dest", "symbol"), &AudioStreamPlaybackPD::send_symbol);
 	ClassDB::bind_method(D_METHOD("send_list", "dest", "list"), &AudioStreamPlaybackPD::send_list);
-	ClassDB::bind_method(D_METHOD("send_message", "dest", "msg", "list"), &AudioStreamPlaybackPD::send_message);
+	ClassDB::bind_method(D_METHOD("send_message", "dest", "type", "values"), &AudioStreamPlaybackPD::send_message);
 	ClassDB::bind_method(D_METHOD("send_note_on", "channel", "pitch", "velocity"), &AudioStreamPlaybackPD::send_note_on, DEFVAL(64));
 	ClassDB::bind_method(D_METHOD("send_note_off", "channel", "pitch"), &AudioStreamPlaybackPD::send_note_off);
 	ClassDB::bind_method(D_METHOD("send_control_change", "channel", "controller", "value"), &AudioStreamPlaybackPD::send_control_change);
@@ -160,18 +163,50 @@ void AudioStreamPlaybackPD::_start(double p_from_pos) {
 	begin_resample();
 }
 
-int AudioStreamPlaybackPD::add_patch(String p_filename, String p_path) {
-	auto patch = pd.openPatch(std_string_from(p_filename), std_string_from(p_path));
-	ERR_FAIL_COND_V_MSG(!patch.isValid(), -1, "Patch located at " + p_path + "/" + p_filename + " was not found or could not be opened.");
+int AudioStreamPlaybackPD::open_patch(String p_path) {
+	fs::path path = std_string_from(p_path);
+	auto filename = path.filename().string();
+	auto dir = path.parent_path().string();
+
+	ERR_FAIL_COND_V_MSG(filename.empty(), -1, "No filename included in path" + p_path);
+
+	if (dir.empty()) {
+		dir = ".";
+	}
+
+	auto patch = pd.openPatch(filename, dir);
+	ERR_FAIL_COND_V_MSG(!patch.isValid(), -1, "Patch located at " + godot_string_from(dir) + "/" + godot_string_from(filename) + " was not found or could not be opened.");
 
 	patches.push_back(patch);
 
 	return patch.dollarZero();
 }
 
-void AudioStreamPlaybackPD::remove_patch(String p_filename, String p_path) {
+void AudioStreamPlaybackPD::close_patch(String p_path) {
+	fs::path path = std_string_from(p_path);
+	auto filename = path.filename().string();
+	auto dir = path.parent_path().string();
+
+	ERR_FAIL_COND_MSG(filename.empty(), "No filename included in path" + p_path);
+
+	if (dir.empty()) {
+		dir = ".";
+	}
+
 	auto remove_end = std::remove_if(patches.begin(), patches.end(), [&](pd::Patch p) {
-		if (p.filename() == std_string_from(p_filename) && p.path() == std_string_from(p_path)) {
+		if (p.filename() == filename && p.path() == dir) {
+			pd.closePatch(p);
+			return true;
+		}
+		return false;
+	});
+
+	patches.erase(remove_end, patches.end());
+}
+
+void AudioStreamPlaybackPD::close_patch_id(int p_dollar_zero) {
+	auto remove_end = std::remove_if(patches.begin(), patches.end(), [&](pd::Patch p) {
+		if (p.dollarZero() == p_dollar_zero) {
 			pd.closePatch(p);
 			return true;
 		}
@@ -263,7 +298,7 @@ int AudioStreamPlaybackPD::get_array_size(String p_name) {
 }
 
 void AudioStreamPlaybackPD::resize_array(String p_name, int64_t p_size) {
-	ERR_FAIL_COND_MSG(libpd_arraysize(std_string_from(p_name).c_str()) < 0, "Array \"" + p_name + "\" was not be found.");
+	ERR_FAIL_COND_MSG(get_array_size(p_name) < 0, "Array \"" + p_name + "\" was not be found.");
 	ERR_FAIL_COND_MSG(!pd.resizeArray(std_string_from(p_name), p_size), "Array resize failed.");
 }
 

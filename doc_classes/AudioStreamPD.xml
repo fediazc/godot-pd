@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AudioStreamPD" inherits="AudioStream" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		An audio stream for interacting with and playing Pure Data (Pd) patches.
+	</brief_description>
+	<description>
+		[AudioStreamPD] receives audio data from Pure Data (Pd) patches. Please see [AudioStreamPlaybackPD], as it contains most of the methods for interacting with Pd (opening patches, sending messages, etc...).
+		[b]Warning[/b]: Multiple AudioStreamPD objects share the same instance of Pd. That is, [b]there is only one instance of Pd running at any given moment[/b]. You will probably get unexpected behavior if you try using two or more AudioStreamPDs at the same time. For this reason, it's recommended that you only use a single [AudioStreamPlayer] to interact with Pd, through an [url=https://docs.godotengine.org/en/stable/tutorials/scripting/singletons_autoload.html]autoload[/url] scene.
+		Here's an overview of the basic operations:
+		[codeblocks]
+		[gdscript]
+		@onready var player: AudioStreamPlayer = $AudioStreamPlayer
+
+		var pd: AudioStreamPlaybackPD
+
+		func _ready():
+			# setup
+			player.play()
+			pd = player.get_stream_playback()
+			
+			# playing patches
+			pd.open_patch("example.pd")
+
+			# sending messages
+			pd.send_bang("start-loop")
+			pd.send_float("set-pitch", 440)
+
+			# receiving messages
+			pd.subscribe("my-tag")
+
+			pd.receive_bang.connect(_on_receive_bang)
+			pd.receive_float.connect(_on_receive_float)
+
+		func _on_receive_bang(dest: String):
+			# do something...
+
+		func _on_receive_float(dest: String, num: float):
+			# do something with num...
+		[/gdscript]
+		[/codeblocks]
+		[b]Note[/b]: The following are the valid value ranges for MIDI messages. *Incoming* messages from Pd are clamped to these values.
+		[codeblocks]
+		[gdscript]
+			# channel: device #0 -> 0 - 15, device #1 -> 16-31, etc
+			# pitch:                0 - 127
+			# velocity:             0 - 127
+			# controller value:     0 - 127
+			# program value:        0 - 127
+			# bend value:       -8192 - 8191
+			# touch value:          0 - 127
+
+			# For raw MIDI messages:
+			# port:                 same as channel
+			# value:                0 - 255
+		[/gdscript]
+		[/codeblocks]
+	</description>
+	<tutorials>
+	</tutorials>
+	<members>
+		<member name="mix_rate" type="int" setter="set_mix_rate" getter="get_mix_rate" default="44100">
+			The sample rate to use (in Hz).
+			When you call [method AudioStreamPlayer.play], this is the sample rate that is set for Pd. If you change the [member mix_rate] property, you will need to call [method AudioStreamPlayer.play] again to set the new sample rate in Pd.
+		</member>
+	</members>
+</class>

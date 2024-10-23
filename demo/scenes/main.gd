@@ -7,7 +7,9 @@ var playing = false
 
 func _ready():
 	begin_playback()
-	pd_playback.add_patch("test-array.pd", "./pd")
+	var id = pd_playback.open_patch("./pd/test-send.pd")
+	print("test-send.pd $0 = ", id)
+	pd_playback.open_patch("pd/test-array.pd")
 	var sz = pd_playback.get_array_size("array")
 	var arr = pd_playback.read_array("array")
 	print("%d element array before write: %s" % [sz, arr])
@@ -17,7 +19,7 @@ func _ready():
 	pd_playback.resize_array("array", 2)
 	arr = pd_playback.read_array("array")
 	print("array after resize: %s" % [arr])
-	pd_playback.remove_patch("test-array.pd", "./pd")
+	pd_playback.close_patch("./pd/test-array.pd")
 	
 	pd_playback.subscribe("godot")
 	pd_playback.receive_bang.connect(_on_receive_bang)
@@ -25,10 +27,9 @@ func _ready():
 	pd_playback.receive_symbol.connect(_on_receive_symbol)
 	pd_playback.receive_list.connect(_on_receive_list)
 	pd_playback.receive_note_on.connect(_on_receive_note_on)
-	pd_playback.add_patch("test-receive.pd", "./pd")
-	pd_playback.add_patch("test-midi.pd", "./pd")
+	pd_playback.open_patch("./pd/test-receive.pd")
+	pd_playback.open_patch("pd/test-midi.pd")
 	
-	pd_playback.add_patch("test-send.pd", "./pd")
 	pd_playback.send_list("list", ["test", 1, 2, 3])
 
 func _process(_delta):

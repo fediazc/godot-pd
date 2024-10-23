@@ -160,6 +160,7 @@ jobs:
         run: |
           mkdir -p godot-pd-release/addons/godot-pd/bin/
           mkdir -p godot-pd-release/addons/godot-pd/icons/
+          mkdir -p godot-pd-release/addons/godot-pd/license/
 
       - name: Download All Artifacts
         uses: actions/download-artifact@v4
@@ -172,11 +173,10 @@ jobs:
         run: |
           cp demo/addons/godot-pd/godot-pd.gdextension godot-pd-release/addons/godot-pd/
           cp README.md godot-pd-release/addons/godot-pd/
-          cp LICENSE.txt godot-pd-release/addons/godot-pd/
+          cp LICENSE.txt godot-pd-release/addons/godot-pd/license/
+          cp 3RDPARTY.txt godot-pd-release/addons/godot-pd/license/
           cp demo/addons/godot-pd/icons/audio_stream_pd.svg godot-pd-release/addons/godot-pd/icons/
-          ls -l godot-pd-release/addons/godot-pd/
-          ls -l godot-pd-release/addons/godot-pd/bin/
-          ls -l godot-pd-release/addons/godot-pd/icons/
+          ls -lR godot-pd-release/addons/godot-pd/
           
       - name: Upload Artifact
         uses: actions/upload-artifact@v4

@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="AudioStreamPlaybackPD" inherits="AudioStreamPlaybackResampled" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		Plays back audio from Pure Data (Pd) patches.
+	</brief_description>
+	<description>
+		[AudioStreamPlaybackPD] is your main handle for interacting with Pure Data (Pd). It is meant to be used with [AudioStreamPD].
+		[b]Note[/b]: Before being able to receive messages coming from Pd through signals ([signal receive_bang], [signal receive_float], etc), you have to [method subscribe] to some message sources first.
+		[b]Note[/b]: See the description of [AudioStreamPD] for information on valid value ranges for MIDI messages. All values incoming from Pd are clamped to these ranges. 
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="close_patch">
+			<return type="void" />
+			<param index="0" name="filename" type="String" />
+			<param index="1" name="path" type="String" />
+			<description>
+				Close [b]ALL[/b] instances of the patch file located in [param path].
+			</description>
+		</method>
+		<method name="close_patch_id">
+			<return type="void" />
+			<param index="0" name="dollar_zero" type="int" />
+			<description>
+				Close the patch instance with ID [param dollar_zero]. 
+			</description>
+		</method>
+		<method name="get_array_size">
+			<return type="int" />
+			<param index="0" name="name" type="String" />
+			<description>
+				Returns the size of a named Pd array. If an array named [param name] can't be found, a negative number is returned.
+			</description>
+		</method>
+		<method name="open_patch">
+			<return type="int" />
+			<param index="0" name="filename" type="String" />
+			<param index="1" name="path" type="String" />
+			<description>
+				Opens a Pd patch file. Do not include [code]res://[/code] in [param path]. 
+				[b]Note[/b]: Currently, when exporting your project, opening patch files that are included in the exported PCK file is not supported. You will have to manually move patch files into your export folder to access them.
+				Returns the [url=https://msp.ucsd.edu/Pd_documentation/resources/chapter2.htm#s2.7.5]dollar-zero[/url] ([code]$0[/code]) for the patch, i.e. a unique ID that is assigned to every patch in Pd. Returns [code]-1[/code] instead if the patch can't be opened.
+			</description>
+		</method>
+		<method name="read_array">
+			<return type="Array" />
+			<param index="0" name="name" type="String" />
+			<param index="1" name="read_len" type="int" default="-1" />
+			<param index="2" name="offset" type="int" default="0" />
+			<description>
+				Read from a named Pd array. Raises an error if you attempt to read beyond the bounds of the array.
+				[param read_len] (optional) is the number of elements to read from the array. [param offset] (optional) is the index from which to start reading. 
+				If [param read_len] is not specified, the entire array is read.
+			</description>
+		</method>
+		<method name="resize_array">
+			<return type="void" />
+			<param index="0" name="name" type="String" />
+			<param index="1" name="size" type="int" />
+			<description>
+				Resize a named Pd array. Raises an error if the array can't be found. If [param size] is less than zero, the array is resized to size [code]1[/code].
+			</description>
+		</method>
+		<method name="send_aftertouch">
+			<return type="void" />
+			<param index="0" name="channel" type="int" />
+			<param index="1" name="value" type="int" />
+			<description>
+				Send a MIDI aftertouch message to Pd.
+			</description>
+		</method>
+		<method name="send_bang">
+			<return type="void" />
+			<param index="0" name="dest" type="String" />
+			<description>
+				Send a bang message to Pd destination [param dest].
+			</description>
+		</method>
+		<method name="send_control_change">
+			<return type="void" />
+			<param index="0" name="channel" type="int" />
+			<param index="1" name="controller" type="int" />
+			<param index="2" name="value" type="int" />
+			<description>
+				Send a MIDI control change message to Pd.
+			</description>
+		</method>
+		<method name="send_float">
+			<return type="void" />
+			<param index="0" name="dest" type="String" />
+			<param index="1" name="value" type="float" />
+			<description>
+				Send a float message to Pd destination [param dest].
+			</description>
+		</method>
+		<method name="send_list">
+			<return type="void" />
+			<param index="0" name="dest" type="String" />
+			<param index="1" name="list" type="Array" />
+			<description>
+				Send a list message to Pd destination [param dest].
+				The list must only contain either [code]String[/code], [code]float[/code], or [code]int[/code]. Sending an empty list is equivalent to sending a bang to [param dest].
+			</description>
+		</method>
+		<method name="send_message">
+			<return type="void" />
+			<param index="0" name="dest" type="String" />
+			<param index="1" name="type" type="String" />
+			<param index="2" name="values" type="Array" />
+			<description>
+				Send a typed message to Pd destination [param dest]. [param type] can be (float, list, stop, etc). [param values] is the list of values to send.
+			</description>
+		</method>
+		<method name="send_midi_byte">
+			<return type="void" />
+			<param index="0" name="port" type="int" />
+			<param index="1" name="value" type="int" />
+			<description>
+				Send a raw MIDI byte to Pd.
+			</description>
+		</method>
+		<method name="send_note_off">
+			<return type="void" />
+			<param index="0" name="channel" type="int" />
+			<param index="1" name="pitch" type="int" />
+			<description>
+				Send a MIDI note off message to Pd.
+				[b]Note[/b]: This is equivalent to a [method send_note_on] message with velocity [code]0[/code]
+			</description>
+		</method>
+		<method name="send_note_on">
+			<return type="void" />
+			<param index="0" name="channel" type="int" />
+			<param index="1" name="pitch" type="int" />
+			<param index="2" name="velocity" type="int" default="64" />
+			<description>
+				Send a MIDI note on message to Pd.
+			</description>
+		</method>
+		<method name="send_pitch_bend">
+			<return type="void" />
+			<param index="0" name="channel" type="int" />
+			<param index="1" name="value" type="int" />
+			<description>
+				Send a MIDI pitch bend message to Pd.
+			</description>
+		</method>
+		<method name="send_poly_aftertouch">
+			<return type="void" />
+			<param index="0" name="channel" type="int" />
+			<param index="1" name="pitch" type="int" />
+			<param index="2" name="value" type="int" />
+			<description>
+				Send a MIDI polyphonic aftertouch message to Pd.
+			</description>
+		</method>
+		<method name="send_program_change">
+			<return type="void" />
+			<param index="0" name="channel" type="int" />
+			<param index="1" name="value" type="int" />
+			<description>
+				Send a MIDI program change message to Pd.
+			</description>
+		</method>
+		<method name="send_symbol">
+			<return type="void" />
+			<param index="0" name="dest" type="String" />
+			<param index="1" name="symbol" type="String" />
+			<description>
+				Send a symbol to Pd destination [param dest].
+			</description>
+		</method>
+		<method name="send_sys_realtime">
+			<return type="void" />
+			<param index="0" name="port" type="int" />
+			<param index="1" name="value" type="int" />
+			<description>
+				Send a raw MIDI realtime byte to Pd.
+			</description>
+		</method>
+		<method name="send_sysex">
+			<return type="void" />
+			<param index="0" name="port" type="int" />
+			<param index="1" name="value" type="int" />
+			<description>
+				Send a raw MIDI sysex byte to Pd.
+			</description>
+		</method>
+		<method name="subscribe">
+			<return type="void" />
+			<param index="0" name="source" type="String" />
+			<description>
+				Subscribe to messages sent by a Pd source. You can connect to signals ([signal receive_bang], [signal receive_float], etc) to receive those messages.
+			</description>
+		</method>
+		<method name="unsubscribe">
+			<return type="void" />
+			<param index="0" name="source" type="String" />
+			<description>
+				Unsubscribe from messages sent by a Pd source.
+			</description>
+		</method>
+		<method name="unsubscribe_all">
+			<return type="void" />
+			<description>
+				Unsubscribe from all sources.
+			</description>
+		</method>
+		<method name="write_array">
+			<return type="void" />
+			<param index="0" name="name" type="String" />
+			<param index="1" name="source" type="float[]" />
+			<param index="2" name="write_len" type="int" default="-1" />
+			<param index="3" name="offset" type="int" default="0" />
+			<description>
+				Write to a named Pd array. [param source] must only contain [code]float[/code] or [code]int[/code]. Raises an error if you attempt to write beyond the bounds of the array, or if [code]write_len > source.size()[/code].
+				[param write_len] (optional) is the number of elements from [param source] to write to the array. [param offset] (optional) is the index from which to start writing to the Pd array. 
+				If [param write_len] is not included, all elements from [param source] will be written to the Pd array.
+			</description>
+		</method>
+	</methods>
+	<signals>
+		<signal name="receive_aftertouch">
+			<param index="0" name="channel" type="int" />
+			<param index="1" name="value" type="int" />
+			<description>
+				Receive a MIDI aftertouch message from Pd.
+			</description>
+		</signal>
+		<signal name="receive_bang">
+			<param index="0" name="dest" type="String" />
+			<description>
+				Receive a bang message from Pd.
+			</description>
+		</signal>
+		<signal name="receive_control_change">
+			<param index="0" name="channel" type="int" />
+			<param index="1" name="controller" type="int" />
+			<param index="2" name="value" type="int" />
+			<description>
+				Receive a MIDI control change message from Pd.
+			</description>
+		</signal>
+		<signal name="receive_float">
+			<param index="0" name="dest" type="String" />
+			<param index="1" name="num" type="float" />
+			<description>
+				Receive a float message from Pd.
+			</description>
+		</signal>
+		<signal name="receive_list">
+			<param index="0" name="dest" type="String" />
+			<param index="1" name="list" type="Array" />
+			<description>
+				Receive a list message from Pd.
+			</description>
+		</signal>
+		<signal name="receive_message">
+			<param index="0" name="dest" type="String" />
+			<param index="1" name="msg" type="String" />
+			<param index="2" name="list" type="Array" />
+			<description>
+				Receive a typed message from Pd.
+			</description>
+		</signal>
+		<signal name="receive_midi_byte">
+			<param index="0" name="port" type="int" />
+			<param index="1" name="value" type="int" />
+			<description>
+				Receive a raw MIDI byte message from Pd.
+			</description>
+		</signal>
+		<signal name="receive_note_on">
+			<param index="0" name="channel" type="int" />
+			<param index="1" name="pitch" type="int" />
+			<param index="2" name="velocity" type="int" />
+			<description>
+				Receive a MIDI note on message from Pd.
+			</description>
+		</signal>
+		<signal name="receive_pitch_bend">
+			<param index="0" name="channel" type="int" />
+			<param index="1" name="value" type="int" />
+			<description>
+				Receive a MIDI pitch bend message from Pd.
+			</description>
+		</signal>
+		<signal name="receive_poly_aftertouch">
+			<param index="0" name="channel" type="int" />
+			<param index="1" name="pitch" type="int" />
+			<param index="2" name="value" type="int" />
+			<description>
+				Receive a MIDI polyphonic aftertouch message from Pd.
+			</description>
+		</signal>
+		<signal name="receive_program_change">
+			<param index="0" name="channel" type="int" />
+			<param index="1" name="value" type="int" />
+			<description>
+				Receive a MIDI program change message from Pd.
+			</description>
+		</signal>
+		<signal name="receive_symbol">
+			<param index="0" name="dest" type="String" />
+			<param index="1" name="symbol" type="String" />
+			<description>
+				Receive a symbol message from Pd.
+			</description>
+		</signal>
+	</signals>
+</class>
