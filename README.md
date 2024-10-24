@@ -8,13 +8,15 @@ Latest tested Godot version: **4.3 stable**.
 
 ## Installation
 
-See [building from source](#building-from-source).
+Download the latest release from the [release page](https://github.com/fediazc/godot-pd/releases), then copy the `addons/` folder to your Godot project's root folder.
+
+You can also [build from source](#building-from-source).
 
 ## Overview
 
-To begin using godot-pd, first create an `AudioStreamPlayer` node, and assign an `AudioStreamPD` as its `stream` property in the inspector. Call `play()` on the `AudioStreamPlayer` node, and then call `get_stream_playback()`. The `AudioStreamPlaybackPD` object returned by `get_stream_playback()` is your main handle for interacting with Pure Data.
+To begin using the extension, assign an `AudioStreamPD` resource to an `AudioStreamPlayer`'s `stream` property in the inspector. For more details, please see the in-editor documentation for both `AudioStreamPlaybackPD` and `AudioStreamPD`.
 
-For more details, please see the in-editor documentation for both `AudioStreamPlaybackPD` and `AudioStreamPD`.
+Here's some sample code:
 
 ```GDScript
 @onready var player: AudioStreamPlayer = $AudioStreamPlayer
