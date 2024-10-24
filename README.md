@@ -51,7 +51,7 @@ func _on_receive_float(dest: String, num: float):
 
 ## Limitations
 
-The [releases](https://github.com/fediazc/godot-pd/releases) for godot-pd are (will be) compiled **without** multiple-instance support for libpd. Every `AudioStreamPD` resource will use **the same instance of Pure Data**. You will probably get unexpected behavior if you try using two or more `AudioStreamPD` objects at the same time. For this reason, it's recommended that you only use a single `AudioStreamPlayer` to interact with Pure Data, through an [autoload](https://docs.godotengine.org/en/stable/tutorials/scripting/singletons_autoload.html) scene.
+The [releases](https://github.com/fediazc/godot-pd/releases) for godot-pd are compiled **without** multiple-instance support for libpd. Every `AudioStreamPD` resource will use **the same instance of Pure Data**. You will probably get unexpected behavior if you try using two or more `AudioStreamPD` objects at the same time. For this reason, it's recommended that you only use a single `AudioStreamPlayer` to interact with Pure Data, through an [autoload](https://docs.godotengine.org/en/stable/tutorials/scripting/singletons_autoload.html) scene.
 
 If you need to get around these limitations for your project, you can [compile godot-pd](#building-from-source) with multiple-instance support enabled, but keep in mind that this has not been tested.
 
