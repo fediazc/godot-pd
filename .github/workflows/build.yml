@@ -1,7 +1,12 @@
 name: Build
 on:
   push:
+    paths-ignore:
+      - 'README.md'
   pull_request:
+    paths-ignore:
+      - 'README.md'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -19,7 +24,7 @@ jobs:
             arch: x86_64
             build-type: Debug
             libpd-lib-dir: libpd/build/libs/
-            target-dir: demo/addons/godot-pd/bin/
+            target-dir: demo/addons/godot-pd/bin/linux/template_debug-x86_64/
             suffix: .so
           - identifier: linux-release
             name: Linux Release
@@ -29,7 +34,7 @@ jobs:
             arch: x86_64
             build-type: Release
             libpd-lib-dir: libpd/build/libs/
-            target-dir: demo/addons/godot-pd/bin/
+            target-dir: demo/addons/godot-pd/bin/linux/template_release-x86_64/
             suffix: .so
           - identifier: windows-debug
             name: Windows Debug
@@ -39,7 +44,7 @@ jobs:
             arch: x86_64
             build-type: Debug
             libpd-lib-dir: libpd/build/libs/
-            target-dir: demo/addons/godot-pd/bin/
+            target-dir: demo/addons/godot-pd/bin/windows/template_debug-x86_64/
             suffix: .dll
           - identifier: windows-release
             name: Windows Release
@@ -49,7 +54,7 @@ jobs:
             arch: x86_64
             build-type: Release
             libpd-lib-dir: libpd/build/libs/
-            target-dir: demo/addons/godot-pd/bin/
+            target-dir: demo/addons/godot-pd/bin/windows/template_release-x86_64/
             suffix: .dll
           - identifier: macos-debug
             name: macOS Debug
@@ -59,7 +64,7 @@ jobs:
             arch: ''
             build-type: Debug
             libpd-lib-dir: libpd/build/libs/
-            target-dir: demo/addons/godot-pd/bin/libgodotpd.macos.template_debug.framework/
+            target-dir: demo/addons/godot-pd/bin/macos/libgodotpd.macos.template_debug.framework/
             suffix: .dylib
           - identifier: macos-release
             name: macOS Release
@@ -69,7 +74,7 @@ jobs:
             arch: ''
             build-type: Release
             libpd-lib-dir: libpd/build/libs/
-            target-dir: demo/addons/godot-pd/bin/libgodotpd.macos.template_release.framework/
+            target-dir: demo/addons/godot-pd/bin/macos/libgodotpd.macos.template_release.framework/
             suffix: .dylib
 
     steps:
@@ -101,10 +106,10 @@ jobs:
           cd libpd
           echo 'set(CMAKE_SHARED_LIBRARY_PREFIX "")' >> CMakeLists.txt
           mkdir build && cd build
-          cmake .. -DCMAKE_TOOLCHAIN_FILE=../../toolchain-mingw-x86_64-w64.cmake -DCMAKE_BUILD_TYPE='${{ matrix.build-type }}'
+          cmake .. -DPD_MULTI:BOOL=ON -DCMAKE_TOOLCHAIN_FILE=../../toolchain-mingw-x86_64-w64.cmake -DCMAKE_BUILD_TYPE='${{ matrix.build-type }}'
           cmake --build .
           cd libs
-          mv liblibpd.dll.a libpd.a
+          mv liblibpd-multi.dll.a libpd-multi.a
           ls -l
       
       - name: (Linux) Compile libpd
@@ -112,7 +117,7 @@ jobs:
         run: |
           cd libpd
           mkdir build && cd build
-          cmake .. -DCMAKE_BUILD_TYPE='${{ matrix.build-type }}'
+          cmake .. -DPD_MULTI:BOOL=ON -DCMAKE_BUILD_TYPE='${{ matrix.build-type }}'
           cmake --build .
           cd libs
           ls -l
@@ -122,7 +127,7 @@ jobs:
         run: |
           cd libpd
           mkdir build && cd build
-          cmake .. -DCMAKE_BUILD_TYPE='${{ matrix.build-type }}' -DCMAKE_OSX_ARCHITECTURES='arm64;x86_64' -DCMAKE_C_COMPILER=$(brew --prefix llvm@15)/bin/clang
+          cmake .. -DPD_MULTI:BOOL=ON -DCMAKE_BUILD_TYPE='${{ matrix.build-type }}' -DCMAKE_OSX_ARCHITECTURES='arm64;x86_64' -DCMAKE_C_COMPILER=$(brew --prefix llvm@15)/bin/clang
           cmake --build .
           cd libs
           ls -l      
@@ -139,7 +144,7 @@ jobs:
 
       - name: Move Shared Library Files
         run: |
-          cp ${{ format('{0}libpd{1}', matrix.libpd-lib-dir, matrix.suffix) }} ${{ matrix.target-dir }}
+          cp ${{ format('{0}libpd-multi{1}', matrix.libpd-lib-dir, matrix.suffix) }} ${{ matrix.target-dir }}
           ls -l ${{ matrix.target-dir }}
       
       - name: Upload Artifact
