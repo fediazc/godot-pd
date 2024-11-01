@@ -22,13 +22,9 @@ AudioStreamPD::AudioStreamPD() {
 AudioStreamPD::~AudioStreamPD() {}
 
 Ref<AudioStreamPlayback> AudioStreamPD::_instantiate_playback() const {
-#ifdef PDINSTANCE
 	Ref<AudioStreamPlaybackPD> playback;
 
 	playback.instantiate();
-#else
-	auto playback = Ref<AudioStreamPlaybackPD>(Engine::get_singleton()->get_singleton("_MainPlaybackPD"));
-#endif
 
 	playback->stream = this;
 
@@ -298,7 +294,7 @@ int AudioStreamPlaybackPD::get_array_size(String p_name) {
 }
 
 void AudioStreamPlaybackPD::resize_array(String p_name, int64_t p_size) {
-	ERR_FAIL_COND_MSG(get_array_size(p_name) < 0, "Array \"" + p_name + "\" was not be found.");
+	ERR_FAIL_COND_MSG(get_array_size(p_name) < 0, "Array \"" + p_name + "\" was not found.");
 	ERR_FAIL_COND_MSG(!pd.resizeArray(std_string_from(p_name), p_size), "Array resize failed.");
 }
 
@@ -307,7 +303,7 @@ Array AudioStreamPlaybackPD::read_array(String p_name, int p_read_len, int p_off
 
 	auto arr_len = get_array_size(p_name);
 
-	ERR_FAIL_COND_V_MSG(arr_len < 0, Array(), "Array \"" + p_name + "\" was not be found.");
+	ERR_FAIL_COND_V_MSG(arr_len < 0, Array(), "Array \"" + p_name + "\" was not found.");
 
 	auto true_read_len = p_read_len < 0 ? arr_len : p_read_len;
 	ERR_FAIL_COND_V_MSG(true_read_len + p_offset > arr_len, Array(), "Read exceeds bound of the Pure Data array. (Requested to read " + godot_string_from(std::to_string(true_read_len)) + " elements at an offset of " + godot_string_from(std::to_string(p_offset)) + " from an array of size " + godot_string_from(std::to_string(arr_len)) + ").");
@@ -328,7 +324,7 @@ void AudioStreamPlaybackPD::write_array(String p_name, TypedArray<float> p_sourc
 
 	auto arr_len = get_array_size(p_name);
 
-	ERR_FAIL_COND_MSG(arr_len < 0, "Array \"" + p_name + "\" was not be found.");
+	ERR_FAIL_COND_MSG(arr_len < 0, "Array \"" + p_name + "\" was not found.");
 
 	std::vector<float> vec;
 	for (int64_t i = 0; i < p_source.size(); i++) {

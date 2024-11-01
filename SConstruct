@@ -9,11 +9,8 @@ env = SConscript("godot-cpp/SConstruct")
 
 main_target_dir = "demo/addons/godot-pd/bin"
 
-if pd_multi:
-    env.Append(CPPDEFINES="PDINSTANCE")
-    env.Append(LIBS=["libpd-multi"])
-else:
-    env.Append(LIBS=["libpd"])
+env.Append(LIBS=["libpd-multi"])
+env.Append(CPPDEFINES="PDINSTANCE")
 
 env.Append(LIBPATH=[libpd_lib_dir])
 env.Append(CPPPATH=["src/"])
@@ -36,12 +33,12 @@ if env["target"] in ["editor", "template_debug"]:
 if env["platform"] == "macos":
     env.Append(LINKFLAGS=['-rpath', '@loader_path'])
     library = env.SharedLibrary(
-        target=os.path.join(main_target_dir, "libgodotpd.{}.{}.framework/libgodotpd.{}.{}".format(env["platform"], env["target"], env["platform"], env["target"])),
+        target=os.path.join(main_target_dir, "macos/libgodotpd.{}.{}.framework/libgodotpd.{}.{}".format(env["platform"], env["target"], env["platform"], env["target"])),
         source=sources,
     )
 else:
     library = env.SharedLibrary(
-        target=os.path.join(main_target_dir, "libgodotpd{}{}".format(env["suffix"], env["SHLIBSUFFIX"])),
+        target=os.path.join(main_target_dir, "{}/{}-{}/libgodotpd{}{}".format(env["platform"], env["target"], env["arch"], env["suffix"], env["SHLIBSUFFIX"])),
         source=sources,
     )
 
