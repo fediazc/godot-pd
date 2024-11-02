@@ -33,6 +33,12 @@ func begin_playback():
 	pd_playback = AudioStreamPlayerPD.get_stream_playback()
 	var id = pd_playback.open_patch("./pd/test-send.pd")
 	print("test-send.pd $0 = ", id)
+	
+	# should not hear "test.pd" playing
+	pd_playback.open_patch("pd/../pd/.///test.pd")
+	pd_playback.close_patch("./scenes///.././pd/test.pd")
+	pd_playback.close_patch_id(pd_playback.open_patch("./pd/test.pd"))
+
 	pd_playback.open_patch("pd/test-array.pd")
 	var sz = pd_playback.get_array_size("array")
 	var arr = pd_playback.read_array("array")
@@ -52,7 +58,8 @@ func begin_playback():
 	pd_playback.receive_list.connect(_on_receive_list)
 	pd_playback.receive_note_on.connect(_on_receive_note_on)
 	pd_playback.open_patch("./pd/test-receive.pd")
-	pd_playback.open_patch("pd/test-midi.pd")
+	
+	pd_playback.open_patch("./pd/test-midi.pd")
 	
 	pd_playback.send_list("list", ["test", 1, 2, 3])
 	
@@ -60,7 +67,6 @@ func begin_playback():
 
 func stop_playback():
 	AudioStreamPlayerPD.stop()
-	pd_playback = null
 	playing = false
 	
 func _on_receive_bang(dest: String):

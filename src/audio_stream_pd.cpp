@@ -160,7 +160,7 @@ void AudioStreamPlaybackPD::_start(double p_from_pos) {
 }
 
 int AudioStreamPlaybackPD::open_patch(String p_path) {
-	fs::path path = std_string_from(p_path);
+	fs::path path = fs::path(std_string_from(p_path)).lexically_normal();
 	auto filename = path.filename().string();
 	auto dir = path.parent_path().string();
 
@@ -179,7 +179,7 @@ int AudioStreamPlaybackPD::open_patch(String p_path) {
 }
 
 void AudioStreamPlaybackPD::close_patch(String p_path) {
-	fs::path path = std_string_from(p_path);
+	fs::path path = fs::path(std_string_from(p_path)).lexically_normal();
 	auto filename = path.filename().string();
 	auto dir = path.parent_path().string();
 
