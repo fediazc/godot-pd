@@ -3,14 +3,17 @@ import os
 from glob import glob
 
 libpd_lib_dir = ARGUMENTS.pop("libpd_lib_dir", "libpd/build/libs")
-pd_multi = ARGUMENTS.pop("pd_multi", False)
+pd_multi = ARGUMENTS.pop("pd_multi", "yes")
 
 env = SConscript("godot-cpp/SConstruct")
 
 main_target_dir = "demo/addons/godot-pd/bin"
 
-env.Append(LIBS=["libpd-multi"])
-env.Append(CPPDEFINES="PDINSTANCE")
+if pd_multi == "yes":
+    env.Append(LIBS=["libpd-multi"])
+    env.Append(CPPDEFINES="PDINSTANCE")
+else:
+    env.Append(LIBS=["libpd"])
 
 env.Append(LIBPATH=[libpd_lib_dir])
 env.Append(CPPPATH=["src/"])
