@@ -178,6 +178,7 @@ jobs:
         run: |
           cp demo/addons/godot-pd/godot-pd.gdextension godot-pd-release/addons/godot-pd/
           cp README.md godot-pd-release/addons/godot-pd/
+          cp CHANGELOG.txt godot-pd-release/addons/godot-pd/
           cp LICENSE.txt godot-pd-release/addons/godot-pd/license/
           cp 3RDPARTY.txt godot-pd-release/addons/godot-pd/license/
           cp demo/addons/godot-pd/icons/audio_stream_pd.svg godot-pd-release/addons/godot-pd/icons/

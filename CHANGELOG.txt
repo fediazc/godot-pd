@@ -1,0 +1,8 @@
+0.2.0 - 2024 Nov 1
+
+* Added the ability to use multiple Pd instances (e.g., have multiple AudioStreamPD objects running).
+* Fixed patches not being closed properly in some cases.
+
+0.1.0 - 2024 Oct 23
+
+* Initial release.
