@@ -4,5 +4,4 @@
 	branch = 4.3
 [submodule "libpd"]
 	path = libpd
-	url = https://github.com/fediazc/libpd
-	branch = godot-pd
+	url = https://github.com/libpd/libpd
