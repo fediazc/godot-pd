@@ -4,7 +4,9 @@
 *.obj
 *.pdb
 *.dblite
+*.os
 
+src/gen/
 libs/
 
 .vscode/
