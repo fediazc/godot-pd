@@ -127,7 +127,7 @@ jobs:
         run: |
           cd libpd
           mkdir build && cd build
-          cmake .. -DPD_MULTI:BOOL=ON -DCMAKE_BUILD_TYPE='${{ matrix.build-type }}' -DCMAKE_OSX_ARCHITECTURES='arm64;x86_64' -DCMAKE_C_COMPILER=$(brew --prefix llvm@15)/bin/clang
+          cmake .. -DPD_MULTI:BOOL=ON -DCMAKE_BUILD_TYPE='${{ matrix.build-type }}' -DCMAKE_OSX_ARCHITECTURES='arm64;x86_64' -DCMAKE_C_COMPILER=$(brew --prefix llvm@18)/bin/clang
           cmake --build .
           cd libs
           ls -l      
