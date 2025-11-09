@@ -129,17 +129,14 @@ int32_t AudioStreamPlaybackPD::_mix_resampled(AudioFrame *p_dst_buffer, int32_t 
 	pd.receiveMidi();
 
 	int ticks = p_frame_count / libpd_blocksize();
-	float output[1024 * 2 * sizeof(float)];
 
-	ERR_FAIL_COND_V_MSG(!pd.processFloat(ticks, NULL, output), p_frame_count, "Pure Data audio processing failed");
+	// an array of `AudioFrame`s is laid out in memory as
+	// interleaved float samples: [left0, right0, left1, right1, left2, right2, ...]
+	// which is exactly what pd.processFloat requires
+	float *dst = reinterpret_cast<float*>(p_dst_buffer);
+	ERR_FAIL_COND_V_MSG(!pd.processFloat(ticks, NULL, dst), p_frame_count, "Pure Data audio processing failed");
 
-	for (unsigned i = 0; i < p_frame_count; i++) {
-		p_dst_buffer->left = output[i * 2];
-		p_dst_buffer->right = output[(i * 2) + 1];
-		p_dst_buffer++;
-	}
-
-	return p_frame_count;
+	return ticks * libpd_blocksize();
 }
 
 float AudioStreamPlaybackPD::_get_stream_sampling_rate() const {
